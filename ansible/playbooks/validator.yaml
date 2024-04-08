@@ -1,0 +1,17 @@
+- name: Configure validator
+  hosts: "{{ var_host | default('dev') }}"
+  remote_user: ubuntu
+
+  roles:
+    - role: validator
+      validator_secrets: "{{ secrets_validators }}"
+      validator_default_address: "{{ validator.default_address }}"
+      validator_name: "{{ validator.node_name }}"
+      validator_private_key_path: "{{ validator.private_key_path }}"
+      validator_subnet_id: "{{ group_vars_validators.subnet_id | default('') }}"
+      validator_cmt_p2p_host_port: "{{ validator.cmt_p2p_host_port | default('26656') }}"
+      validator_cmt_rpc_host_port: "{{ validator.cmt_rpc_host_port | default('26657') }}"
+      validator_ethapi_host_port: "{{ validator.ethapi_host_port | default('8545') }}"
+      validator_resolver_host_port: "{{ validator.resolver_host_port  | default('26655')}}"
+      validator_bootstraps: "{{ bootstraps | default('') }}"
+      validator_resolver_bootstraps: "{{ resolver_bootstraps | default('') }}"

@@ -1,0 +1,15 @@
+- name: Set facts from envs
+  tags: always
+  ansible.builtin.set_fact:
+    validator__home: "{{ lookup('ansible.builtin.env', 'HOME') }}"
+    validator__path: "{{ lookup('ansible.builtin.env', 'PATH') }}"
+
+- name: Set miscelanious facts
+  tags: always
+  ansible.builtin.set_fact:
+    validator__ipc_data: "{{ validator__home }}/.ipc"
+    validator__ipc_data_backup: "{{ validator__home }}/.ipc.bkp"
+    validator__cometbft_data: "{{ validator_parent_subnet_id }}-{{ validator_subnet_id }}/{{ validator_name }}/cometbft/data"
+    validator__fendermint_data: "{{ validator_parent_subnet_id }}-{{ validator_subnet_id }}/{{ validator_name }}/fendermint/data"
+    validator__arch_map:
+      x86_64: "amd64"

@@ -1,0 +1,42 @@
+- name: Run child-validator
+  tags: always
+  register: validator__run_output
+  ansible.builtin.command:
+    argv:
+      - cargo
+      - make
+      - --makefile
+      - "{{ validator_ipc_repository_path }}/infra/fendermint/Makefile.toml"
+      - -e
+      - "NODE_NAME={{ validator_name }}"
+      - -e
+      - "PRIVATE_KEY_PATH={{ validator_private_key_path }}"
+      - -e
+      - "SUBNET_ID=/{{ validator_parent_subnet_id }}/{{ validator_subnet_id }}"
+      - -e
+      - "CMT_P2P_HOST_PORT={{ validator_cmt_p2p_host_port }}"
+      - -e
+      - "CMT_RPC_HOST_PORT={{ validator_cmt_rpc_host_port }}"
+      - -e
+      - "ETHAPI_HOST_PORT={{ validator_ethapi_host_port }}"
+      - -e
+      - "BOOTSTRAPS={{ validator_bootstraps }}"
+      - -e
+      - "RESOLVER_BOOTSTRAPS={{ validator_resolver_bootstraps }}"
+      - -e
+      - "PARENT_REGISTRY={{ validator_parent_registry }}"
+      - -e
+      - "PARENT_GATEWAY={{ validator_parent_gateway }}"
+      - -e
+      - "CMT_EXTERNAL_ADDR={{ ansible_default_ipv4.address }}:{{ validator_cmt_p2p_host_port }}"
+      - -e
+      - FM_PULL_SKIP="1"
+      - child-validator
+  changed_when: true
+  environment:
+    PATH: "{{ validator__home }}/.cargo/bin:{{ validator__path }}"
+
+- name: Print validator run command output
+  tags: always
+  ansible.builtin.debug:
+    msg: "{{ validator__run_output }}"

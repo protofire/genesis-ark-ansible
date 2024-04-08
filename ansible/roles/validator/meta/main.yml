@@ -1,0 +1,24 @@
+# @meta description: >
+# This is an Ansible role for IPC Validator installation
+# @end
+galaxy_info:
+  author: Ales Dumikau
+  description: Ansible role for IPC Validator installation
+  company: Protofire
+
+  namespace: micelium
+
+  # @meta license
+  license: GPLv3
+
+  min_ansible_version: "2.1"
+
+  platforms:
+    - name: Ubuntu
+    - name: Debian
+
+  galaxy_tags:
+    - 'ipc'
+    - 'validator'
+
+dependencies: []

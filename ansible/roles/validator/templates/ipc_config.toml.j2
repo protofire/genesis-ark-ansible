@@ -1,0 +1,19 @@
+keystore_path = "~/.ipc"
+
+[[subnets]]
+id = "/{{ validator_parent_subnet_id }}"
+
+[subnets.config]
+network_type = "fevm"
+provider_http = "https://api.calibration.node.glif.io/rpc/v1"
+gateway_addr = "{{ validator_parent_gateway }}"
+registry_addr = "{{ validator_parent_registry }}"
+
+[[subnets]]
+id = "/{{ validator_parent_subnet_id }}/{{ validator_subnet_id }}"
+
+[subnets.config]
+network_type = "fevm"
+provider_http = "http://127.0.0.1:{{ validator_ethapi_host_port }}"
+gateway_addr = "0x77aa40b105843728088c0132e43fc44348881da8"
+registry_addr = "0x74539671a1d2f1c8f200826baba665179f53a1b7"

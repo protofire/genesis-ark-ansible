@@ -1,0 +1,8 @@
+- name: Update IPC repository
+  tags: always
+  ansible.builtin.git:
+    repo: "{{ validator_ipc_repository_url }}"
+    dest: "{{ validator_ipc_repository_path }}"
+    version: "{{ validator_ipc_repository_version }}"
+    force: true
+    update: true

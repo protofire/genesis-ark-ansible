@@ -1,0 +1,24 @@
+- name: Copy templatized private keys
+  tags: always
+  vars:
+    validator__private_key_hex: "{{ item.private_key }}"
+  ansible.builtin.template:
+    src: private_key.j2
+    dest: "{{ validator__ipc_data }}/{{ item.name }}.sk"
+    mode: "0600"
+  loop: "{{ validator_secrets.wallets }}"
+
+- name: Run import wallet command
+  tags: always
+  changed_when: true
+  register: validator__set_default_wallet_output
+  ansible.builtin.command:
+    argv:
+      - "{{ validator_ipc_repository_path }}/target/release/ipc-cli"
+      - wallet
+      - import
+      - --private-key
+      - "{{ item.private_key }}"
+      - --wallet-type
+      - evm
+  loop: "{{ validator_secrets.wallets }}"

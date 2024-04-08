@@ -1,0 +1,6 @@
+- name: Ensure fendermint image is absent
+  tags: always
+  community.docker.docker_image:
+    name: fendermint
+    tag: latest
+    state: absent

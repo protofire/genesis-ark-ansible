@@ -1,0 +1,7 @@
+- name: Install dependencies [Debian]
+  become: true
+  tags: always
+  ansible.builtin.apt:
+    name: "{{ validator_package_dependencies_debian }}"
+    state: present
+    update_cache: true

@@ -1,0 +1,5 @@
+- name: Ensure subnet data is absent
+  tags: always
+  ansible.builtin.file:
+    name: "{{ validator__ipc_data }}/{{ validator_parent_subnet_id }}-{{ validator_subnet_id }}"
+    state: absent

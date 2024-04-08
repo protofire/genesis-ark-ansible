@@ -1,0 +1,26 @@
+- name: Run join subnet command
+  tags: always
+  changed_when: true
+  register: validator__subnet_join_output
+  ansible.builtin.command:
+    argv:
+      - "{{ validator_ipc_repository_path }}/target/release/ipc-cli"
+      - subnet
+      - join
+      - --subnet
+      - "/{{ validator_parent_subnet_id }}/{{ validator_subnet_id }}"
+      - "--from"
+      - "{{ item.address }}"
+      - --collateral
+      - "10"
+      - --public-key
+      - "{{ item.public_key }}"
+      - --initial-balance
+      - "{{ validator_min_validator_stake }}"
+  when: '"validator" in item.name'
+  loop: "{{ validator_secrets.wallets }}"
+
+- name: Print join subnet command output
+  tags: always
+  ansible.builtin.debug:
+    msg: "{{ validator__subnet_join_output }}"

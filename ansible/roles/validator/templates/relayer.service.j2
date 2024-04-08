@@ -1,0 +1,10 @@
+[Unit]
+Description=Relayer
+
+[Service]
+User={{ ansible_user }}
+WorkingDirectory={{ validator_ipc_repository_path }}
+ExecStart={{ validator_ipc_repository_path }}/target/release/ipc-cli checkpoint relayer --subnet /{{ validator_parent_subnet_id }}/{{ validator_subnet_id }}
+
+[Install]
+WantedBy=multi-user.target

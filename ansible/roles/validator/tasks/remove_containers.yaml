@@ -1,0 +1,17 @@
+- name: Ensure ethapi container is absent
+  tags: always
+  community.docker.docker_container:
+    name: "{{ validator_name }}-ethapi"
+    state: absent
+
+- name: Ensure cometbft container is absent
+  tags: always 
+  community.docker.docker_container:
+    name: "{{ validator_name }}-cometbft"
+    state: absent
+
+- name: Ensure fendermint container is absent
+  tags: always
+  community.docker.docker_container:
+    name: "{{ validator_name }}-fendermint"
+    state: absent

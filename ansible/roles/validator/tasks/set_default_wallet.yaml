@@ -1,0 +1,18 @@
+- name: Run set default wallet command
+  tags: always
+  changed_when: true
+  register: validator__set_default_wallet_output
+  ansible.builtin.command:
+    argv:
+      - "{{ validator_ipc_repository_path }}/target/release/ipc-cli"
+      - wallet
+      - set-default
+      - --address
+      - "{{ validator_default_address }}"
+      - --wallet-type
+      - evm
+
+- name: Print set default wallet output
+  tags: always
+  ansible.builtin.debug:
+    msg: "{{ validator__set_default_wallet_output }}"

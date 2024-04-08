@@ -1,0 +1,14 @@
+- name: Pull fendermint image
+  tags: always
+  community.docker.docker_image:
+    name: "{{ validator_fendermint_image_url }}"
+    source: pull
+  register: validator__imageinfo
+
+- name: Tag fendermint image
+  tags: always
+  community.docker.docker_image:
+    name: "{{ validator__imageinfo.image.Id }}"
+    repository: "{{ validator_fendermint_image_name }}"
+    force_tag: true
+    source: local

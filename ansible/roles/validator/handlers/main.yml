@@ -1,0 +1,7 @@
+- name: Restart relayer
+  become: true
+  ansible.builtin.systemd:
+    name: relayer
+    state: restarted
+    enabled: true
+    daemon_reload: true

@@ -1,0 +1,82 @@
+- name: Set facts
+  ansible.builtin.include_tasks: set_facts.yaml
+  tags:
+    - always
+
+- name: Install deps [Debian]
+  ansible.builtin.include_tasks: deps_debian.yaml
+  when: ansible_os_family == "Debian"
+  tags:
+    - validator:prepare
+
+- name: Ensure relevant containers are absent
+  ansible.builtin.include_tasks: remove_containers.yaml
+  tags:
+    - validator:prune
+
+- name: Ensure relevant images are absent
+  ansible.builtin.include_tasks: remove_images.yaml
+  tags:
+    - validator:prune
+
+- name: Ensure repositories are up-to-date
+  ansible.builtin.include_tasks: update_repos.yaml
+  tags:
+    - validator:prepare
+
+- name: Ensure fendermint image is present
+  ansible.builtin.include_tasks: pull_images.yaml
+  tags:
+    - validator:prepare
+
+- name: Ensure binaries are present
+  ansible.builtin.include_tasks: pull_binaries.yaml
+  tags:
+    - validator:prepare
+    - validator:pull_bin
+
+- name: Ensure wallets are imported
+  ansible.builtin.include_tasks: import_wallets.yaml
+  tags:
+    - validator:prepare
+
+- name: Ensure default wallet is set and correct
+  ansible.builtin.include_tasks: set_default_wallet.yaml
+  tags:
+    - validator:prepare
+
+- name: Ensure IPC config is up-to-date
+  ansible.builtin.include_tasks: configure_ipc.yaml
+  tags:
+    - validator:prepare
+    - validator:start_relayer
+
+- name: Join validators to subnet
+  ansible.builtin.include_tasks: join_subnet.yaml
+  tags:
+    - validator:join_subnet
+
+- name: Ensure IPC data folders are absent
+  ansible.builtin.include_tasks: delete_data.yaml
+  tags:
+    - validator:prune
+
+- name: Create subnet
+  ansible.builtin.include_tasks: create_subnet.yaml
+  tags:
+    - validator:create_subnet
+
+- name: Start validator as bootstrap
+  ansible.builtin.include_tasks: start_bootstrap.yaml
+  tags:
+    - validator:start_bootstrap
+
+- name: Start validator
+  ansible.builtin.include_tasks: start_validator.yaml
+  tags:
+    - validator:start
+
+- name: Start relayer
+  ansible.builtin.include_tasks: start_relayer.yaml
+  tags:
+    - validator:start_relayer

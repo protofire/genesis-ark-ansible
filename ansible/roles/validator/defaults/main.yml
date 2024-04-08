@@ -1,0 +1,187 @@
+# @var validator_package_dependencies_debian:type: list
+# @var validator_package_dependencies_debian:description: >
+# `validator_package_dependencies_debian` is a list of packages
+# required to install IPC Validator on Debian-based Linux distributions.
+# @end
+validator_package_dependencies_debian:
+  - build-essential
+  - bzr
+  - ca-certificates
+  - clang
+  - cmake
+  - curl
+  - gcc
+  - git
+  - gnupg
+  - hwloc
+  - jq
+  - libhwloc-dev
+  - libssl-dev
+  - pkg-config
+  - protobuf-compiler
+  - unzip
+  - wget
+
+# @var validator_ipc_repository_url:type: string
+# @var validator_ipc_repository_url:description: >
+# `validator_ipc_repository_url` is the URL to the Git repository
+# that contains the IPC source code.
+# @end
+validator_ipc_repository_url: "https://github.com/consensus-shipyard/ipc.git"
+
+# @var validator_ipc_repository_version:type: string
+# @var validator_ipc_repository_version:description: >
+# `validator_ipc_repository_version` is the branch/tag/commit name to clone.
+# @end
+validator_ipc_repository_version: "main"
+
+# @var validator_ipc_repository_path:type: string
+# @var validator_ipc_repository_path:description: >
+# `validator_ipc_repository_path` is local path to
+# the ipc repository.
+# @end
+validator_ipc_repository_path: "/home/ubuntu/ipc"
+
+# @var validator_name:type: string
+# @var validator_name:description: >
+# `validator_name` is the name of the validator.
+# @end
+validator_name: validator-1
+
+# @var validator_private_key_path:type: local path
+# @var validator_private_key_path:description: >
+# `validator_private_key_path` is the local path to the validator private key.
+# @end
+validator_private_key_path: "/home/ubuntu/.ipc/validator_1"
+
+# @var validator_subnet_id:type: string
+# @var validator_subnet_id:description: >
+# `validator_subnet_id` is the IPC parent subnet ID the validator subnet belongs to.
+# @end
+validator_parent_subnet_id: "r314159"
+
+# @var validator_subnet_id:type: string
+# @var validator_subnet_id:description: >
+# `validator_subnet_id` is the IPC subnet ID the validator has to be a part of.
+# @end
+validator_subnet_id: "t410fug7q7fgzeehfgr6qlubzs45z2sjzcbw3nbhpiyi"
+
+# @var validator_cmt_p2p_host_port:type: integer
+# @var validator_cmt_p2p_host_port:description: >
+# `validator_cmt_p2p_host_port` is a Comet BFT P2P port.
+# @end
+validator_cmt_p2p_host_port: "3305"
+
+# @var validator_cmt_rpc_host_port:type: integer
+# @var validator_cmt_rpc_host_port:description: >
+# `validator_cmt_rpc_host_port` is a Comet BFT RPC port.
+# @end
+validator_cmt_rpc_host_port: "3306"
+
+# @var validator_ethapi_host_port:type: integer
+# @var validator_ethapi_host_port:description: >
+# `validator_ethapi_host_port` is a Fendermint Eth API port.
+# @end
+validator_ethapi_host_port: "8545"
+
+# @var validator_resolver_host_port:type: string
+# @var validator_resolver_host_port:description: >
+# `validator_resolver_host_port` is a port number of
+# the resolver host.
+# @end
+validator_resolver_host_port: "26655"
+
+# @var validator_parent_registry:type: Etherium-like address
+# @var validator_parent_registry:description: >
+# `validator_parent_registry` is a registry contract
+# address in the parent network.
+# @end
+validator_parent_registry: "0x503C8C5C361f1c978eA9a0cC12629d4b05CA5317"
+
+# @var validator_parent_gateway:type: Etherium-like address
+# @var validator_parent_gateway:description: >
+# `validator_parent_gateway` is a gateway contract
+# address in the parent network.
+# @end
+validator_parent_gateway: "0x0571602E01C06197A9284BBfcCA0092CBdC1f12A"
+
+# @var validator_min_validator_stake:type: int
+# @var validator_min_validator_stake:description: >
+# `validator_min_validator_stake` is the minimum stake
+# of a validator in the subnet.
+# @end
+validator_min_validator_stake: 1
+
+# @var validator_min_validators:type: int
+# @var validator_min_validators:description: >
+# `validator_min_validators` is the minimum number
+# ov validators in the subnet.
+# @end
+validator_min_validators: 4
+
+# @var validator_bottom_check_period:type: int
+# @var validator_bottom_check_period:description: >
+# `validator_bottom_check_period` is the bottom-check
+# period of a validator.
+# @end
+validator_bottom_check_period: 30
+
+# @var validator_permission_mode:type: string
+# @var validator_permission_mode:description: >
+# `validator_permission_mode` is the permission
+# mode of the subnet.
+# @end
+validator_permission_mode: collateral
+
+# @var validator_supply_source_kind:type: string
+# @var validator_supply_source_kind:description: >
+# `validator_supply_source_kind` is the kind of
+# a supply source in the subnet.
+# @end
+validator_supply_source_kind: native
+
+# @var validator_default_address:type: string
+# @var validator_default_address:description: >
+# `validator_default_address` is the default address
+# ipc-cli will use in the --from flag.
+# @end
+validator_default_address: "0xbc68608545c51873e1a3e864f7edfbcfe3d70ce7"
+
+# @var validator_secrets:type: dict
+# @var validator_secrets:description: >
+# `validator_secrets` is a list of validator secrets.
+# @end
+validator_secrets: []
+
+# @var validator_bootstraps:type: string
+# @var validator_bootstraps:description: >
+# `validator_bootstraps` is the node that validator
+# will use as a bootstrap.
+# @end
+validator_bootstraps: <PLEASE PUT COMETBFT NODE ID of VALIDATOR-1>@validator-1-cometbft:26656
+
+# @var validator_resolver_bootstraps:type: type
+# @var validator_resolver_bootstraps:description: >
+# `validator_resolver_bootstraps` description
+# @end
+validator_resolver_bootstraps: /dns/validator-1-fendermint/tcp/26655/p2p/<PLEASE PUT PEER_ID of VALIDATOR-1>
+
+# @var validator_fendermint_image_url:type: string
+# @var validator_fendermint_image_url:description: >
+# `validator_fendermint_image_url` is the pre-built image of fendermint.
+# @end
+validator_fendermint_image_url: glif/lotus:fendermint-amd64
+
+# @var validator_fendermint_image_name:type: string
+# @var validator_fendermint_image_name:description: >
+# `validator_fendermint_image_name` is the name fendermint image
+# shall be tagged with.
+# @end
+validator_fendermint_image_name: fendermint:latest
+
+# @var validator_bin_repo_url:type: string
+# @var validator_bin_repo_url:description: >
+# `validator_bin_repo_url` is the url of archive
+# that contains pre-compiled ipc and fendermint binaries.
+# @end
+validator_bin_repo_url: https://glif-ipc.s3.ap-northeast-1.amazonaws.com

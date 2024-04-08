@@ -1,0 +1,6 @@
+- name: Sandbox playbook
+  hosts: "{{ var_host | default('dev') }}"
+  tasks:
+    - name: Debug
+      ansible.builtin.debug:
+        msg: "Hello, World!"

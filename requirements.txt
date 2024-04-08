@@ -1,0 +1,8 @@
+flask
+ansible-runner
+jsonschema
+toml
+PyYAML
+requests
+pymongo[srv]
+Flask-PyMongo

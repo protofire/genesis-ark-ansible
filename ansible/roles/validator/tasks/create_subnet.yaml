@@ -1,0 +1,26 @@
+- name: Run create subnet command
+  tags: always
+  changed_when: true
+  register: validator__subnet_create_output
+  ansible.builtin.command:
+    argv:
+      - "{{ validator_ipc_repository_path }}/target/release/ipc-cli"
+      - "subnet"
+      - "create"
+      - "--parent"
+      - "/{{ validator_parent_subnet_id }}"
+      - "--min-validator-stake"
+      - "{{ validator_min_validator_stake }}"
+      - "--min-validators"
+      - "{{ validator_min_validators }}"
+      - "--bottomup-check-period"
+      - "{{ validator_bottom_check_period }}"
+      - "--permission-mode"
+      - "{{ validator_permission_mode }}"
+      - "--supply-source-kind"
+      - "{{ validator_supply_source_kind }}"
+
+- name: Print create subnet output
+  tags: always
+  ansible.builtin.debug:
+    msg: "{{ validator__subnet_create_output }}"

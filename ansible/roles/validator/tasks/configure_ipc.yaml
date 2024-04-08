@@ -1,0 +1,15 @@
+- name: Ensure ipc data dir exists
+  tags: always
+  ansible.builtin.file:
+    path: "{{ validator__ipc_data }}"
+    state: directory
+    mode: "0774"
+    owner: ubuntu
+    group: ubuntu
+
+- name: Copy templatized config to ipc data dir
+  tags: always
+  ansible.builtin.template:
+    src: ipc_config.toml.j2
+    dest: "{{ validator__ipc_data }}/config.toml"
+    mode: "0644"
