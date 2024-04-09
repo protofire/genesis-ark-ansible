@@ -2,6 +2,6 @@ class JobsAPIException(Exception):
     pass
 
 
-class ArtifactsNotFound:
+class StatsNotFoundException(JobsAPIException):
     code = 404
-    description = "artifacts_not_found"
+    description = "stats_not_found"

@@ -1,14 +1,16 @@
 from bson.json_util import dumps
-from flask import Response
+from flask import Response, request
 
 from app.v1.jobs import jobs_bp
-from app.v1.jobs.models import Job
+from app.v1.jobs.models import Job, EventsFilter
 
 
 @jobs_bp.route("/<job_id>/events", methods=["GET"])
 def handle_list_job_events(job_id):
     job = Job(job_id=job_id)
-    events = job.list_events()
+
+    events_filter = EventsFilter(request.args)
+    events = job.list_events(events_filter=events_filter.dumps())
 
     payload = dumps(events)
     res = Response(payload)
@@ -16,6 +18,12 @@ def handle_list_job_events(job_id):
     return res
 
 
-@jobs_bp.route("/<job_id>/events/<event_id>", methods=["GET"])
-def handle_get_job_event(job_id, event_id):
-    pass
+@jobs_bp.route("/<job_id>/stats", methods=["GET"])
+def handle_get_stats(job_id):
+    job = Job(job_id=job_id)
+    stats = job.get_stats()
+
+    payload = dumps(stats)
+    res = Response(payload)
+    res.headers["Content-Type"] = "application/json"
+    return res
