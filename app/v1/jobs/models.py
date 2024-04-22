@@ -1,6 +1,9 @@
+import os
+
 from flask import current_app
-from app.extensions import mongo
 from werkzeug.datastructures import ImmutableMultiDict
+
+from app.extensions import mongo
 from app.v1.jobs.exceptions import StatsNotFoundException
 
 
@@ -65,3 +68,12 @@ class Job:
         if stats is None:
             raise StatsNotFoundException(f"stats not found for job {self.job_id}")
         return stats
+
+    def get_status(self) -> dict:
+        status_file_path = os.path.join(
+            self.private_data_dir_root, self.job_id, "artifacts", self.job_id, "status"
+        )
+        status = None
+        with open(status_file_path, "r") as f:
+            status = f.read().rstrip()
+        return {"status": status}

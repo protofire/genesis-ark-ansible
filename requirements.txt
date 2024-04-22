@@ -6,3 +6,4 @@ PyYAML
 requests
 pymongo[srv]
 Flask-PyMongo
+click

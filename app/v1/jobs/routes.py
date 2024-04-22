@@ -27,3 +27,10 @@ def handle_get_stats(job_id):
     res = Response(payload)
     res.headers["Content-Type"] = "application/json"
     return res
+
+
+@jobs_bp.route("/<job_id>/status", methods=["GET"])
+def handle_get_status(job_id):
+    job = Job(job_id=job_id)
+    status = job.get_status()
+    return status, 200
