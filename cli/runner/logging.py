@@ -19,6 +19,5 @@ logs_file = os.path.join(logs_dir, "cli.log")
 logger.add(
     logs_file,
     format="{time} {level} {message}",
-    filter="cli",
     level="DEBUG",
 )
