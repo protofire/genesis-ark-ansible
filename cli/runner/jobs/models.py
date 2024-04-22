@@ -16,8 +16,17 @@ def log_response_hook(r: requests.Response, *args, **kwargs) -> None:
 
 
 class JobManager:
-    def __init__(self, job_id: str):
-        self.job_id
+    def __init__(
+        self,
+        job_id: str,
+        api_url="http://localhost:5000/api/v1",
+    ):
+        self.job_id = job_id
+        self.api_url = api_url
+
+    def get_status(self) -> requests.Response:
+        logger.info(f"get job status: job_id = '{self.job_id}'")
+        return self._request(method="GET", path=f"/jobs/{self.job_id}/status")
 
     def _request(self, method: str, path: str, json: dict = {}) -> requests.Response:
         """Wraper around the standard request method to apply the logging response hook.
