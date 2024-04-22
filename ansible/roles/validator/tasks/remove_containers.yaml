@@ -5,7 +5,7 @@
     state: absent
 
 - name: Ensure cometbft container is absent
-  tags: always 
+  tags: always
   community.docker.docker_container:
     name: "{{ validator_name }}-cometbft"
     state: absent
