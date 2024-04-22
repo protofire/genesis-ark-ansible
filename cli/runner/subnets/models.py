@@ -277,7 +277,7 @@ class SubnetManager:
 
         res = self._request(
             method="POST",
-            path=f"/playbooks/{playbook_name}/run",
+            path=f"/playbooks/{playbook_name}/projects/{self.project_id}/run",
             json=payload,
         )
 
