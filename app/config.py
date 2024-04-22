@@ -8,6 +8,7 @@ class Config(object):
     PRIVATE_DATA_DIR = "/home/ubuntu/work/ipc/flask-runner/ansible/jobs"
     PLAYBOOKS_DIR = "/home/ubuntu/work/ipc/flask-runner/ansible/playbooks"
     MONGO_URI = "mongodb://root:root@localhost/admin"
+    ROLES_PATH = "/home/ubuntu/work/ipc/flask-runner/ansible/roles"
 
 
 class ProductionConfig(Config):

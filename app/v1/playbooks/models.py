@@ -19,6 +19,7 @@ class Playbook:
         self.playbook_name = playbook_name
         self.project_id = project_id
         self.playbooks_dir = current_app.config["PLAYBOOKS_DIR"]
+        self.roles_dir = current_app.config["ROLES_PATH"]
         self.playbook_path = os.path.join(self.playbooks_dir, playbook_name)
 
     def is_exists(self):
@@ -48,6 +49,7 @@ class Playbook:
             tags=tags,
             ident=job_id,
             event_handler=event_handler,
+            roles_path=self.roles_dir,
         )
 
         return job_id
