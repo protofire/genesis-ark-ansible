@@ -12,9 +12,7 @@ def handle_api_errors(err):
     return jsonify(response), err.code
 
 
-@keys_bp.errorhandler(500)
+@keys_bp.errorhandler(Exception)
 def handle_internal_server_error(err):
-    response = {
-        "error": "Sorry, that error is on us, please contact support if this wasn't an accident"
-    }
+    response = {"error": type(err).__name__, "message": err.message}
     return jsonify(response), 500
