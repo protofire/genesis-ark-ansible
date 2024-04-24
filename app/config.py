@@ -9,6 +9,8 @@ class Config(object):
     PLAYBOOKS_DIR = "/home/ubuntu/work/ipc/flask-runner/ansible/playbooks"
     MONGO_URI = "mongodb://root:root@localhost/admin"
     ROLES_PATH = "/home/ubuntu/work/ipc/flask-runner/ansible/roles"
+    MAINNET_RPC_URL = "https://api.node.glif.io/rpc/v1"
+    CALIBNET_RPC_URL = "https://api.calibration.node.glif.io/rpc/v1"
 
 
 class ProductionConfig(Config):

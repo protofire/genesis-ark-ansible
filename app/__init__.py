@@ -25,10 +25,12 @@ def register_blueprints(app):
     from app.v1.inventories import inventory_bp
     from app.v1.playbooks import playbooks_bp
     from app.v1.jobs import jobs_bp
+    from app.v1.keys import keys_bp
 
     app.register_blueprint(inventory_bp, url_prefix="/api/v1/inventories")
     app.register_blueprint(playbooks_bp, url_prefix="/api/v1/playbooks")
     app.register_blueprint(jobs_bp, url_prefix="/api/v1/jobs")
+    app.register_blueprint(keys_bp, url_prefix="/api/v1/keys")
 
 
 def create_app(test_config=None):

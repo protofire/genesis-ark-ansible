@@ -7,3 +7,5 @@ requests
 pymongo[srv]
 Flask-PyMongo
 click
+eth-keys
+web3
