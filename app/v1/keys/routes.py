@@ -8,7 +8,7 @@ from app.v1.keys.models import EvmKey
 
 
 @keys_bp.route("/address", methods=["POST"])
-def handle_get_address(private_key: str):
+def handle_get_address():
     req_json = request.get_json()
     validate(instance=req_json, schema=address_request_schema)
 
@@ -24,7 +24,7 @@ def handle_get_address(private_key: str):
 
 
 @keys_bp.route("/public_key", methods=["POST"])
-def handle_public_key(private_key: str):
+def handle_public_key():
     req_json = request.get_json()
     validate(instance=req_json, schema=public_key_request_schema)
 
