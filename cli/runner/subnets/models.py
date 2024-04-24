@@ -1,18 +1,5 @@
 import requests
-from runner.logging import logger
-
-
-def log_response_hook(r: requests.Response, *args, **kwargs) -> None:
-    status_code = r.status_code
-    content = r.json() if r.headers["Content-Type"] == "application/json" else r.content
-    if r.status_code != requests.codes.ok:
-        logger.error(
-            f"recieved error from runner: status_code = '{status_code}', content = '{content}'"
-        )
-    else:
-        logger.debug(
-            f"recieved response from runner: status_code = '{r.status_code}', content = '{content}'"
-        )
+from runner.logging import logger, log_response_hook
 
 
 class SubnetManager:
@@ -33,6 +20,30 @@ class SubnetManager:
 
     def get_project_id(self):
         return self.subnet_config["id"]
+
+    def make_host_vars(self) -> dict:
+        example = {
+            "validator_name": "",
+            "validator_private_key_path": "",
+            "validator_parent_subnet_id": "",
+            "validator_subnet_id": "",
+            "validator_cmt_p2p_host_port": "",
+            "validator_cmt_rpc_host_port": "",
+            "validator_ethapi_host_port": "",
+            "validator_resolver_host_port": "",
+            "validator_parent_registry": "",
+            "validator_parent_gateway": "",
+            "validator_min_validator_stake": "",
+            "validator_min_validators": "",
+            "validator_bottom_check_period": "",
+            "validator_permission_mode": "",
+            "validator_supply_source_kind": "",
+            "validator_default_address": "",
+            "validator_secrets": "",
+            "validator_bootstraps": "",
+            "validator_resolver_bootstraps": "",
+        }
+        return {}
 
     def is_validator(self, node: dict) -> bool:
         """Determine if the given node is a validator.
@@ -140,6 +151,14 @@ class SubnetManager:
             json=host_vars,
         )
 
+    def make_validators_group_vars(self, subnet_id: str = "") -> dict:
+        return {"subnet_id": subnet_id}
+
+    def make_non_bootstraps_group_vars(
+        self, bootstraps: str = "", resolver_bootstraps: str = ""
+    ) -> dict:
+        return {"bootstraps": bootstraps, "resolver_bootstraps": resolver_bootstraps}
+
     def populate_inventory(self) -> None:
         """Populate an Ansible inventory based on the configs provided"""
         hosts = self.merge_hosts_data()
@@ -164,8 +183,21 @@ class SubnetManager:
             )
 
             # Additionaly populate host vars
-            # TODO: maybe we can merge it with some defaults from env?
-            host_vars = {"ansible_host": host["conn"]["ipAddress"]}
+            # TODO: Maybe sanitize it?
+            node_name = host_name
+            # TODO: Populate with actual role vars
+            host_vars = {
+                "ansible_host": host["conn"]["ipAddress"],
+                "validator": {
+                    "node_name": node_name,
+                    "private_key_path": f"/home/ubuntu/.ipc/{node_name}.sk",
+                    "cmt_p2p_host_port": "",
+                    "cmt_rpc_host_port": "",
+                    "ethapi_host_port": "",
+                    "resolver_host_port": "",
+                    "default_address": "",
+                },
+            }
             self.set_host_vars(
                 group_name=self.GROUP_VALIDATORS,
                 host_name=host_name,

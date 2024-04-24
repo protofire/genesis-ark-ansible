@@ -1,18 +1,5 @@
 import requests
-from runner.logging import logger
-
-
-def log_response_hook(r: requests.Response, *args, **kwargs) -> None:
-    status_code = r.status_code
-    content = r.json() if r.headers["Content-Type"] == "application/json" else r.content
-    if r.status_code != requests.codes.ok:
-        logger.error(
-            f"recieved error from runner: status_code = '{status_code}', content = '{content}'"
-        )
-    else:
-        logger.debug(
-            f"recieved response from runner: status_code = '{r.status_code}', content = '{content}'"
-        )
+from runner.logging import logger, log_response_hook
 
 
 class JobManager:
