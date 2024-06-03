@@ -1,35 +1,17 @@
 import requests
-from runner.logging import logger, log_response_hook
+from runner.logging import logger
+from runner.client import Client
 
 
-class JobManager:
-    def __init__(
-        self,
-        job_id: str,
-        api_url="http://localhost:5000/api/v1",
-    ):
-        self.job_id = job_id
-        self.api_url = api_url
+class JobsClient(Client):
+    def get_status(self, job_id: str) -> requests.Response:
+        logger.info(f"get job status: job_id = '{job_id}'")
+        return self.request(method="GET", path=f"/jobs/{job_id}/status")
 
-    def get_status(self) -> requests.Response:
-        logger.info(f"get job status: job_id = '{self.job_id}'")
-        return self._request(method="GET", path=f"/jobs/{self.job_id}/status")
+    def get_stats(self, job_id: str) -> requests.Response:
+        logger.info(f"get job ststs: job_id = '{job_id}'")
+        return self.request(method="GET", path=f"/jobs/{job_id}/stats")
 
-    def _request(self, method: str, path: str, json: dict = {}) -> requests.Response:
-        """Wraper around the standard request method to apply the logging response hook.
-
-        Args:
-            method (str): HTTP method.
-            path (str): HTTP path. Will be appended at the end of 'self.api_url'.
-            json (dict, optional): JSON payload. Defaults to an empty dict.
-
-        Returns:
-            requests.Response: result of the operation
-        """
-        url = f"{self.api_url}{path}"
-        return requests.request(
-            method=method,
-            url=url,
-            json=json,
-            hooks={"response": log_response_hook},
-        )
+    def list_events(self, job_id: str) -> requests.Response:
+        logger.info(f"list job events: job_id = '{job_id}'")
+        return self.request(method="GET", path=f"/jobs/{job_id}/events")

@@ -1,5 +1,5 @@
 import click
-from runner.keys.models import EvmKeysManager
+from runner.keys.models import KeysClient
 
 
 @click.group(name="keys", help="Retrieve key info.")
@@ -14,8 +14,8 @@ def keys():
     required=True,
 )
 def get_public_key(private_key: str):
-    evm = EvmKeysManager(private_key=private_key)
-    evm.get_public_key()
+    evm = KeysClient()
+    evm.get_public_key(private_key=private_key)
 
 
 @keys.command(name="address", help="Retrieve account address on the specified network.")
@@ -32,5 +32,5 @@ def get_public_key(private_key: str):
     help="Can be one of the following: test, dev, prod.",
 )
 def get_address(private_key: str, network_type_for: str):
-    evm = EvmKeysManager(private_key=private_key)
-    evm.get_address(network_type_for=network_type_for)
+    evm = KeysClient()
+    evm.get_address(private_key=private_key, network_type_for=network_type_for)
