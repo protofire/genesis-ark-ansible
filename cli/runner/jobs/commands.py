@@ -1,7 +1,6 @@
 import click
 
 from runner.jobs.models import JobsClient
-from runner.logging import logger
 
 
 @click.group(name="jobs", help="Manage runner jobs.")

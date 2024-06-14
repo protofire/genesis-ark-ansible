@@ -35,6 +35,13 @@
     - validator:prepare
     - validator:pull_bin
 
+- name: Ensure IPC config is up-to-date
+  ansible.builtin.include_tasks: configure_ipc.yaml
+  tags:
+    - validator:prepare
+    - validator:start_relayer
+    - validator:copy_config
+
 - name: Ensure wallets are imported
   ansible.builtin.include_tasks: import_wallets.yaml
   tags:
@@ -44,12 +51,6 @@
   ansible.builtin.include_tasks: set_default_wallet.yaml
   tags:
     - validator:prepare
-
-- name: Ensure IPC config is up-to-date
-  ansible.builtin.include_tasks: configure_ipc.yaml
-  tags:
-    - validator:prepare
-    - validator:start_relayer
 
 - name: Join validators to subnet
   ansible.builtin.include_tasks: join_subnet.yaml

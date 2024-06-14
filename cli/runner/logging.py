@@ -1,15 +1,7 @@
 import os
-import sys
 import requests
 
 from loguru import logger
-
-logger.add(
-    sys.stdout,
-    format="{time} {level} {message}",
-    filter="cli",
-    level="INFO",
-)
 
 working_dir = os.getcwd()
 logs_dir = os.path.join(working_dir, "logs")
@@ -20,7 +12,7 @@ logs_file = os.path.join(logs_dir, "cli.log")
 logger.add(
     logs_file,
     format="{time} {level} {message}",
-    level="DEBUG",
+    level="WARNING",
 )
 
 
@@ -28,7 +20,7 @@ def log_response_hook(r: requests.Response, *args, **kwargs) -> None:
     status_code = r.status_code
     content = r.json() if r.headers["Content-Type"] == "application/json" else r.content
     if r.status_code != requests.codes.ok:
-        logger.error(
+        logger.debug(
             f"recieved error from runner: status_code = '{status_code}', content = '{content}'"
         )
     else:

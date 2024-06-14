@@ -4,7 +4,7 @@ from flask import current_app
 from werkzeug.datastructures import ImmutableMultiDict
 
 from app.extensions import mongo
-from app.v1.jobs.exceptions import StatsNotFoundException
+from app.v1.jobs.exceptions import StatsNotFoundException, StatusNotFoundException
 
 
 class EventsFilter:
@@ -73,6 +73,9 @@ class Job:
         status_file_path = os.path.join(
             self.private_data_dir_root, self.job_id, "artifacts", self.job_id, "status"
         )
+
+        if not os.path.exists(status_file_path):
+            raise StatusNotFoundException(f"status not found: job_id = '{self.job_id}'")
         status = None
         with open(status_file_path, "r") as f:
             status = f.read().rstrip()

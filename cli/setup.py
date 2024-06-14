@@ -12,6 +12,6 @@ setup(
     ],
     entry_points="""
         [console_scripts]
-        runner=runner.cli:cli
+        runner=runner.cli:safe_entrypoint
     """,
 )
