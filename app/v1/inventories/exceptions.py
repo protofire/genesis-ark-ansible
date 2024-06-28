@@ -1,4 +1,7 @@
-class InventoriesAPIException(Exception):
+from app.exceptions import APIException
+
+
+class InventoriesAPIException(APIException):
     pass
 
 

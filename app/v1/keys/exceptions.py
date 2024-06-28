@@ -1,4 +1,7 @@
-class KeysAPIException(Exception):
+from app.exceptions import APIException
+
+
+class KeysAPIException(APIException):
     pass
 
 

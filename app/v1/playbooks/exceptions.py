@@ -1,4 +1,7 @@
-class PlaybooksAPIException(Exception):
+from app.exceptions import APIException
+
+
+class PlaybooksAPIException(APIException):
     pass
 
 

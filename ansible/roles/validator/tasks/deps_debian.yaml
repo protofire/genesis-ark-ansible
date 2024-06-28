@@ -5,3 +5,13 @@
     name: "{{ validator_package_dependencies_debian }}"
     state: present
     update_cache: true
+
+- name: Install rust
+  tags: always
+  ansible.builtin.shell: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+  changed_when: true
+
+- name: Install cargo make
+  tags: always
+  ansible.builtin.shell: /home/ubuntu/.cargo/bin/cargo install --force cargo-make
+  changed_when: true

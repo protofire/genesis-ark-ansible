@@ -1,14 +1,21 @@
-from runner.logging import logger
-from runner.keys.models import KeysClient
+import re
+
+from runner.inventories.exceptions import GroupExistsException, HostExistsException
 from runner.inventories.models import InvenentoriesClient
-from runner.playbooks.models import PlaybooksClient
 from runner.jobs.models import JobsClient
+from runner.keys.models import KeysClient
+from runner.logging import logger
+from runner.playbooks.models import PlaybooksClient
 from runner.subnets.exceptions import (
+    BootstrapsNotFound,
     InstanceConnectionConfigNotFoundException,
     WalletNotFoundException,
-    BootstrapsNotFound,
+    SubnetCreationEventNotFoundException,
+    SubnetIdNotFoundException,
+    BootstrapNodeStartEventNotFoundException,
+    CometBftNodeIdNotFoundException,
+    IpldResolverMultiaddressNotFoundException,
 )
-from runner.inventories.exceptions import GroupExistsException, HostExistsException
 
 
 class AnsibleOperator:
@@ -18,14 +25,23 @@ class AnsibleOperator:
     CONTOL_GROUP_NAME = "control"
 
     def __init__(self, subnet_config: dict, conn_config: dict) -> None:
+        # set incoming configs
         self.subnet_config = subnet_config
         self.conn_config = conn_config
 
-        self.keys_client = KeysClient()
-        self.inventories_client = InvenentoriesClient()
-        self.playbooks_client = PlaybooksClient()
-        self.jobs_client = JobsClient()
+        # compute and set project id
+        self.project_id = self.get_project_id()
 
+        # set contextualized logger
+        self.logger = logger.bind(project_id=self.project_id)
+
+        # set API clients with contextualized loggers
+        self.keys_client = KeysClient(logger=self.logger)
+        self.inventories_client = InvenentoriesClient(logger=self.logger)
+        self.playbooks_client = PlaybooksClient(logger=self.logger)
+        self.jobs_client = JobsClient(logger=self.logger)
+
+        # set miscellanious computed facts
         self.secrets = self.compute_secrets()
         self.bootstraps = self.get_bootstrap_validators_node_configs()
 
@@ -61,6 +77,96 @@ class AnsibleOperator:
             )
         return secrets
 
+    def prepare(self):
+        res = self.playbooks_client.prepare(
+            project_id=self.project_id,
+            extra_vars={"var_host": self.VALIDATORS_GROUP_NAME},
+        )
+
+        return res["job_id"]
+
+    def create_subnet(self) -> str:
+        res = self.playbooks_client.create_subnet(
+            project_id=self.project_id,
+            extra_vars={"var_host": self.CONTOL_GROUP_NAME},
+        )
+
+        return res["job_id"]
+
+    def get_cometbft_node_id(self, job_id: str) -> str:
+        events_res = self.jobs_client.list_events(
+            job_id=job_id,
+            events_filter={
+                "event": "runner_on_ok",
+                "task": "Print run bootstrap command output",
+            },
+        )
+
+        bootstrap_started_event = events_res[0]
+        stdout = bootstrap_started_event["event_data"]["res"]["msg"]["stdout"]
+
+        pattern = r"CometBFT node ID:\s+([a-z0-9]+)"
+        found = re.findall(pattern=pattern, string=stdout)
+        return found[0]
+
+    def get_subnet_id(self, job_id: str) -> str:
+        event_type = "runner_on_ok"
+        task_name = "Print create subnet output"
+
+        events = self.jobs_client.list_events(
+            job_id=job_id,
+            events_filter={
+                "event": event_type,
+                "task": task_name,
+            },
+        )
+
+        if len(events) != 1:
+            raise SubnetCreationEventNotFoundException(
+                f"subnet creation event not found: runner_ident = '{job_id}', event_type = '{event_type}', task_name = '{task_name}'"
+            )
+
+        event = events[0]
+
+        pattern = r".*created subnet actor with id: ([\/a-z0-9]+)"
+        found = re.findall(
+            pattern=pattern, string=event["event_data"]["res"]["msg"]["stdout"]
+        )
+
+        if len(found) == 0:
+            raise SubnetIdNotFoundException(
+                f"subnet id not found in event stdout: event_uuid = '{event['uuid']}'"
+            )
+
+        full_subnet_id = found[0]
+        chunks = full_subnet_id.split("/")
+
+        return chunks[-1]
+
+    def copy_config(self) -> str:
+        res = self.playbooks_client.copy_config(
+            project_id=self.project_id,
+            extra_vars={"var_host": self.VALIDATORS_GROUP_NAME},
+        )
+
+        return res["job_id"]
+
+    def start_bootstrap(self) -> str:
+        res = self.playbooks_client.start_bootstrap(
+            project_id=self.project_id,
+            extra_vars={"var_host": self.BOOTSTRAPS_GROUP_NAME},
+        )
+
+        return res["job_id"]
+
+    def start_validators(self) -> str:
+        res = self.playbooks_client.start_validator(
+            project_id=self.project_id,
+            extra_vars={"var_host": self.NON_BOOTSTRAPS_GROUP_NAME},
+        )
+
+        return res["job_id"]
+
     def get_instance_connection_config(self, node_id: int) -> dict:
         for instance_connection_config in self.conn_config["instanceconnections"]:
             if instance_connection_config["nodeId"] == node_id:
@@ -84,6 +190,21 @@ class AnsibleOperator:
         wallet = self.get_validator_wallet(validator_name=validator_name)
         return wallet["address"]
 
+    def set_subnet_id(self, subnet_id: str) -> None:
+        self.inventories_client.set_group_vars(
+            project_id=self.project_id,
+            group_name=self.VALIDATORS_GROUP_NAME,
+            group_vars={"validator_subnet_id": subnet_id},
+        )
+
+    def join_subnet(self) -> str:
+        res = self.playbooks_client.join_subnet(
+            project_id=self.project_id,
+            extra_vars={"var_host": self.CONTOL_GROUP_NAME},
+        )
+
+        return res["job_id"]
+
     def compute_host_vars(self, node_config: dict) -> dict:
         instance_connection_config = self.get_instance_connection_config(
             node_id=node_config["id"]
@@ -94,10 +215,10 @@ class AnsibleOperator:
             "validator_name": validator_name,
             "validator_private_key_path": f"/home/ubuntu/.ipc/{validator_name}.sk",
             "validator_parent_subnet_id": "r314159",
-            "validator_parent_registry": "0x503C8C5C361f1c978eA9a0cC12629d4b05CA5317",
-            "validator_parent_gateway": "0x0571602E01C06197A9284BBfcCA0092CBdC1f12A",
+            "validator_parent_registry": "0xc938B2B862d4Ef9896E641b3f1269DabFB2D2103",
+            "validator_parent_gateway": "0x6d25fbFac9e6215E03C687E54F7c74f489949EaF",
             "validator_min_validator_stake": self.subnet_config["minStake"],
-            "validator_min_validators": 4,
+            "validator_min_validators": 1,
             "validator_bottom_check_period": self.subnet_config["bottomUp"],
             "validator_permission_mode": "collateral",
             "validator_supply_source_kind": "native",
@@ -105,7 +226,7 @@ class AnsibleOperator:
                 validator_name=validator_name
             ),
             "validator_secrets": self.secrets,
-            "ansible_sudo_pass": "test",
+            "ansible_sudo_pass": "12345",  # TODO: replace with the sudo password of the host somehow
         }
 
     def get_bootstrap_validators_node_configs(self) -> list[dict]:
@@ -125,10 +246,10 @@ class AnsibleOperator:
         # Create control group in the inventory.
         try:
             self.inventories_client.add_group(
-                project_id=self.get_project_id(), group_name=self.CONTOL_GROUP_NAME
+                project_id=self.project_id, group_name=self.CONTOL_GROUP_NAME
             )
         except GroupExistsException as e:
-            logger.warning(e)
+            logger.warning(e.args[0], **e.extra)
 
         control_node_config = self.get_control_node_config()
         control_node_host_name = self.get_validator_name(
@@ -137,16 +258,16 @@ class AnsibleOperator:
 
         try:
             self.inventories_client.add_host_to_group(
-                project_id=self.get_project_id(),
+                project_id=self.project_id,
                 host_name=control_node_host_name,
                 group_name=self.CONTOL_GROUP_NAME,
             )
         except HostExistsException as e:
-            logger.warning(e)
+            logger.warning(e.args[0], **e.extra)
 
         control_host_vars = self.compute_host_vars(node_config=control_node_config)
         self.inventories_client.set_host_vars(
-            project_id=self.get_project_id(),
+            project_id=self.project_id,
             host_name=control_node_host_name,
             group_name=self.CONTOL_GROUP_NAME,
             host_vars=control_host_vars,
@@ -155,26 +276,26 @@ class AnsibleOperator:
         # Create bootstraps group in the inventory.
         try:
             self.inventories_client.add_group(
-                project_id=self.get_project_id(), group_name=self.BOOTSTRAPS_GROUP_NAME
+                project_id=self.project_id, group_name=self.BOOTSTRAPS_GROUP_NAME
             )
         except GroupExistsException as e:
-            logger.warning(e)
+            logger.warning(e.args[0], **e.extra)
 
         # Add bootstrap hosts to bootstrap group and set host vars
         for node_config in self.bootstraps:
             host_name = self.get_validator_name(node_config=node_config)
             try:
                 self.inventories_client.add_host_to_group(
-                    project_id=self.get_project_id(),
+                    project_id=self.project_id,
                     host_name=host_name,
                     group_name=self.BOOTSTRAPS_GROUP_NAME,
                 )
             except HostExistsException as e:
-                logger.warning(e)
+                logger.warning(e.args[0], **e.extra)
 
             host_vars = self.compute_host_vars(node_config=node_config)
             self.inventories_client.set_host_vars(
-                project_id=self.get_project_id(),
+                project_id=self.project_id,
                 host_name=host_name,
                 group_name=self.BOOTSTRAPS_GROUP_NAME,
                 host_vars=host_vars,
@@ -183,18 +304,18 @@ class AnsibleOperator:
         # Create non-bootstraps group in the inventory.
         try:
             self.inventories_client.add_group(
-                project_id=self.get_project_id(), group_name="non_bootstraps"
+                project_id=self.project_id, group_name="non_bootstraps"
             )
         except GroupExistsException as e:
-            logger.warning(e)
+            logger.warning(e.args[0], **e.extra)
 
         # Create validators group in the inventory. This group includes both bootstrap and non-bootstrap nodes
         try:
             self.inventories_client.add_group(
-                project_id=self.get_project_id(), group_name="validators"
+                project_id=self.project_id, group_name="validators"
             )
         except GroupExistsException as e:
-            logger.warning(e)
+            logger.warning(e.args[0], **e.extra)
 
         # Add validators to the validator group and set host vars
         # Add non-bootstrap nodes to the non_bootstraps group and set host vars
@@ -206,16 +327,16 @@ class AnsibleOperator:
             host_name = self.get_validator_name(node_config=node_config)
             try:
                 self.inventories_client.add_host_to_group(
-                    project_id=self.get_project_id(),
+                    project_id=self.project_id,
                     host_name=host_name,
                     group_name=self.VALIDATORS_GROUP_NAME,
                 )
             except HostExistsException as e:
-                logger.warning(e)
+                logger.warning(e.args[0], **e.extra)
 
             host_vars = self.compute_host_vars(node_config=node_config)
             self.inventories_client.set_host_vars(
-                project_id=self.get_project_id(),
+                project_id=self.project_id,
                 host_name=host_name,
                 group_name=self.VALIDATORS_GROUP_NAME,
                 host_vars=host_vars,
@@ -229,15 +350,15 @@ class AnsibleOperator:
 
             try:
                 self.inventories_client.add_host_to_group(
-                    project_id=self.get_project_id(),
+                    project_id=self.project_id,
                     host_name=host_name,
                     group_name=self.NON_BOOTSTRAPS_GROUP_NAME,
                 )
             except HostExistsException as e:
-                logger.warning(e)
+                logger.warning(e.args[0], **e.extra)
 
             self.inventories_client.set_host_vars(
-                project_id=self.get_project_id(),
+                project_id=self.project_id,
                 host_name=host_name,
                 group_name=self.NON_BOOTSTRAPS_GROUP_NAME,
                 host_vars=host_vars,

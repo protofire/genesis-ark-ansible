@@ -28,7 +28,14 @@ class Playbook:
     def run(self, tags=None, extra_vars=None):
         if not self.is_exists():
             raise PlaybookNotFoundException(
-                f"playbook '{self.playbook_name}' not found"
+                "failed to run playbook: playbook not found",
+                playbook_name=self.playbook_name,
+                project_id=self.project_id,
+                playbooks_dir=self.playbooks_dir,
+                roles_dir=self.roles_dir,
+                playbook_path=self.playbook_path,
+                tags=tags,
+                extra_vars=extra_vars,
             )
 
         job_id = str(uuid.uuid1().hex)

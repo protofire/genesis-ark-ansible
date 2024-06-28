@@ -70,7 +70,11 @@ class Inventory:
 
     def get_group(self, group_name: str) -> dict:
         if not self.is_group_exists(group_name=group_name):
-            raise GroupNotFoundException(f"group '{group_name}' not found")
+            raise GroupNotFoundException(
+                "failed to get group: group not found",
+                group_name=group_name,
+                project_id=self.project_id,
+            )
         return self.inventory["all"]["children"][group_name]
 
     def get_group_vars(self, group_name: str) -> dict:
@@ -90,34 +94,57 @@ class Inventory:
 
     def add_group(self, group_name: str) -> None:
         if self.is_group_exists(group_name=group_name):
-            raise GroupExistsException(f"group '{group_name}' aready exists")
+            raise GroupExistsException(
+                "failed to add group: group already exists",
+                group_name=group_name,
+                project_id=self.project_id,
+            )
         self.inventory["all"]["children"][group_name] = {"hosts": {}, "vars": {}}
 
     def delete_group(self, group_name: str) -> None:
         if not self.is_group_exists(group_name=group_name):
-            raise GroupNotFoundException(f"group '{group_name}' not found")
+            raise GroupNotFoundException(
+                "failed to delete group: group not found",
+                group_name=group_name,
+                project_id=self.project_id,
+            )
         del self.inventory["all"]["children"][group_name]
 
     def set_group_var(self, group_name: str, var_name: str, var_value) -> None:
         if not self.is_group_exists(group_name=group_name):
-            raise GroupNotFoundException(f"group '{group_name}' not found")
+            raise GroupNotFoundException(
+                "failed to set group var: group not found",
+                group_name=group_name,
+                project_id=self.project_id,
+            )
         self.inventory["all"]["children"][group_name]["vars"][var_name] = var_value
 
     def set_group_vars(self, group_name: str, group_vars: dict) -> None:
         if not self.is_group_exists(group_name=group_name):
-            raise GroupNotFoundException(f"group '{group_name}' not found")
+            raise GroupNotFoundException(
+                "failed to set group vars: group not found",
+                group_name=group_name,
+                project_id=self.project_id,
+            )
         self.inventory["all"]["children"][group_name]["vars"] = group_vars
 
     def delete_group_var(self, group_name: str, var_name: str) -> None:
         if not self.is_group_var_exists(group_name=group_name, var_name=var_name):
             raise GroupVarNotFoundException(
-                f"var '{var_name}' not found in group '{group_name}'"
+                "failed to unset group var: var not found in group",
+                var_name=var_name,
+                group_name=group_name,
+                project_id=self.project_id,
             )
         del self.inventory["all"]["children"][group_name]["vars"][var_name]
 
     def delete_group_vars(self, group_name: str) -> None:
         if not self.is_group_exists(group_name=group_name):
-            raise GroupNotFoundException(f"group '{group_name}' not found")
+            raise GroupNotFoundException(
+                "failed to unset group vars: group not found",
+                group_name=group_name,
+                project_id=self.project_id,
+            )
         self.inventory["all"]["children"][group_name]["vars"] = {}
 
     def is_group_host_exists(self, group_name: str, host_name: str) -> bool:
@@ -126,21 +153,30 @@ class Inventory:
     def add_group_host(self, group_name: str, host_name: str) -> None:
         if self.is_group_host_exists(group_name=group_name, host_name=host_name):
             raise HostExistsException(
-                f"host '{host_name}' exists in group '{group_name}'"
+                "failed to add host to group: host already exists in group",
+                host_name=host_name,
+                group_name=group_name,
+                project_id=self.project_id,
             )
         self.inventory["all"]["children"][group_name]["hosts"][host_name] = {}
 
     def delete_group_host(self, group_name: str, host_name: str) -> None:
         if not self.is_group_host_exists(group_name=group_name, host_name=host_name):
             raise HostNotFoundInGroupException(
-                f"host '{host_name}' not found in group '{group_name}'"
+                "failed to delete host from group: host not found in group",
+                host_name=host_name,
+                group_name=group_name,
+                project_id=self.project_id,
             )
         del self.inventory["all"]["children"][group_name]["hosts"][host_name]
 
     def get_group_host_vars(self, group_name: str, host_name: str) -> dict:
         if not self.is_group_host_exists(group_name=group_name, host_name=host_name):
             raise HostNotFoundInGroupException(
-                f"host '{host_name}' not found in group '{group_name}'"
+                "failed to get host vars: host not found in group",
+                host_name=host_name,
+                group_name=group_name,
+                project_id=self.project_id,
             )
         return self.inventory["all"]["children"][group_name]["hosts"][host_name]
 
@@ -161,7 +197,12 @@ class Inventory:
     ) -> None:
         if not self.is_group_host_exists(group_name=group_name, host_name=host_name):
             raise HostNotFoundInGroupException(
-                f"host '{host_name}' not found in group '{group_name}'"
+                "failed to set host var: host not found in group",
+                var_name=var_name,
+                var_value=var_value,
+                host_name=host_name,
+                group_name=group_name,
+                project_id=self.project_id,
             )
         self.inventory["all"]["children"][group_name]["hosts"][host_name][var_name] = (
             var_value
@@ -174,7 +215,11 @@ class Inventory:
             group_name=group_name, host_name=host_name, var_name=var_name
         ):
             raise HostVarNotFoundException(
-                f"var '{var_name}' not found for host '{host_name}' in group '{group_name}'"
+                "failed to unset host var: host var not found",
+                var_name=var_name,
+                host_name=host_name,
+                group_name=group_name,
+                project_id=self.project_id,
             )
         del self.inventory["all"]["children"][group_name]["hosts"][host_name][var_name]
 
@@ -183,14 +228,21 @@ class Inventory:
     ) -> None:
         if not self.is_group_host_exists(group_name=group_name, host_name=host_name):
             raise HostNotFoundException(
-                f"host '{host_name}' not found in group '{group_name}'"
+                "failed to set host vars: host not found in group",
+                host_vars=host_vars,
+                host_name=host_name,
+                group_name=group_name,
+                project_id=self.project_id,
             )
         self.inventory["all"]["children"][group_name]["hosts"][host_name] = host_vars
 
     def delete_group_host_vars(self, group_name: str, host_name: str) -> None:
         if not self.is_group_host_exists(group_name=group_name, host_name=host_name):
             raise HostNotFoundException(
-                f"host '{host_name}' not found in group '{group_name}'"
+                "failed to unset host vars: host not found in group",
+                host_name=host_name,
+                group_name=group_name,
+                project_id=self.project_id,
             )
         self.inventory["all"]["children"][group_name]["hosts"][host_name] = {}
 
@@ -207,7 +259,11 @@ class Inventory:
             if host_name in self.list_group_hosts_names(group_name=group_name):
                 group_names.add(group_name)
         if len(group_names) == 0:
-            raise HostNotFoundException(f"host '{host_name}' not found in any group")
+            raise HostNotFoundException(
+                "failed to list host groups: host not found in any group",
+                host_name=host_name,
+                project_id=self.project_id,
+            )
         return sorted(list(group_names))
 
     def delete_host(self, host_name) -> None:

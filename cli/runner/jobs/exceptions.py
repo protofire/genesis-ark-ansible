@@ -15,3 +15,7 @@ class StatsNotFoundException(JobsClientException):
 
 class TimeoutWaitingForCompletionException(JobsClientException):
     pass
+
+
+class JobFailedException(JobsClientException):
+    pass

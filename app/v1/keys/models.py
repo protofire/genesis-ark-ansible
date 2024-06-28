@@ -22,7 +22,8 @@ class EvmKey:
         w3 = Web3(provider=Web3.HTTPProvider(endpoint_uri=endpoint_uri))
         if not w3.is_connected():
             raise NetworkNotConnectedException(
-                f"cannot connect to network by url: {endpoint_uri}"
+                "failed to get wallet address: cannot connect to network by url",
+                endpoint_uri=endpoint_uri,
             )
 
         priv_key = w3.eth.account.from_key(private_key=self.private_key)

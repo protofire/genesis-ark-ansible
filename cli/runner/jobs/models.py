@@ -7,34 +7,37 @@ from runner.jobs.exceptions import (
     StatusNotFoundException,
     TimeoutWaitingForCompletionException,
     JobsClientException,
+    JobFailedException,
 )
 from runner.client import safe
 
 
-def exception_raiser(description: str, message: str) -> None:
-    match description:
+def exception_raiser(error: dict) -> None:
+    match error["error"]:
         case "stats_not_found":
-            raise StatsNotFoundException(message)
+            raise StatsNotFoundException(**error)
         case "status_not_found":
-            raise StatusNotFoundException(message)
+            raise StatusNotFoundException(**error)
         case _:
-            raise JobsClientException(message)
+            raise JobsClientException(**error)
 
 
 class JobsClient(Client):
+    LOGGER_NAME = "jobs"
+
     @safe(exception_raiser=exception_raiser, default_exception=JobsClientException)
     def get_status(self, job_id: str) -> dict:
-        logger.info(f"get job status: job_id = '{job_id}'")
+        self.logger.info("get job status", job_id=job_id)
         return self.request(method="GET", path=f"/jobs/{job_id}/status")
 
     @safe(exception_raiser=exception_raiser, default_exception=JobsClientException)
     def get_stats(self, job_id: str) -> requests.Response:
-        logger.info(f"get job ststs: job_id = '{job_id}'")
+        self.logger.info("get job stats", job_id=job_id)
         return self.request(method="GET", path=f"/jobs/{job_id}/stats")
 
     @safe(exception_raiser=exception_raiser, default_exception=JobsClientException)
     def list_events(self, job_id: str, events_filter: dict = {}) -> requests.Response:
-        logger.info(f"list job events: job_id = '{job_id}'")
+        self.logger.info("list job events", job_id=job_id)
         return self.request(
             method="GET", path=f"/jobs/{job_id}/events", params=events_filter
         )
@@ -46,7 +49,10 @@ class JobsClient(Client):
         while current_attempt < max_attempts:
             try:
                 res = self.get_status(job_id=job_id)
-                return res["status"]
+                status = res["status"]
+                if status == "failed":
+                    raise JobFailedException(f"job failed: job_id = {job_id}")
+                return status
             except StatusNotFoundException:
                 time.sleep(wait_seconds)
                 current_attempt += 1

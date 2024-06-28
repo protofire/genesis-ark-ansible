@@ -1,4 +1,7 @@
-class JobsAPIException(Exception):
+from app.exceptions import APIException
+
+
+class JobsAPIException(APIException):
     pass
 
 

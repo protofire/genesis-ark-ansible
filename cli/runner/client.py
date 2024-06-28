@@ -1,9 +1,10 @@
+import json
 from functools import wraps
 
 import requests
 from requests.exceptions import JSONDecodeError
 
-from runner.logging import log_response_hook
+from runner.logging import log_response_hook, logger
 
 
 def safe(
@@ -23,9 +24,7 @@ def safe(
             error = res.json()
             if "error" not in error.keys():
                 raise default_exception(error)
-            error_description = error["error"]
-            error_message = error.get("message", "no message provided")
-            exception_raiser(error_description, error_message)
+            exception_raiser(error)
 
         return safe_inner
 
@@ -33,8 +32,11 @@ def safe(
 
 
 class Client:
-    def __init__(self, api_url: str = "http://localhost:5000/api/v1"):
+    LOGGER_NAME = "basic"
+
+    def __init__(self, api_url: str = "http://localhost:5000/api/v1", logger=logger):
         self.api_url = api_url
+        self.logger = logger.bind(logger=self.LOGGER_NAME)
 
     def request(
         self, method: str, path: str, json: dict = {}, params: dict = {}

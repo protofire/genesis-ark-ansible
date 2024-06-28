@@ -12,9 +12,7 @@
       - "--from"
       - "{{ item.address }}"
       - --collateral
-      - "10"
-      - --public-key
-      - "{{ item.public_key }}"
+      - "{{ validator_min_validator_stake }}"
       - --initial-balance
       - "{{ validator_min_validator_stake }}"
   when: '"validator" in item.name'

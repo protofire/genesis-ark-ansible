@@ -35,10 +35,14 @@
     - validator:prepare
     - validator:pull_bin
 
+- name: Ensure default config is present
+  ansible.builtin.include_tasks: copy_default_config.yaml
+  tags:
+    - validator:prepare
+
 - name: Ensure IPC config is up-to-date
   ansible.builtin.include_tasks: configure_ipc.yaml
   tags:
-    - validator:prepare
     - validator:start_relayer
     - validator:copy_config
 

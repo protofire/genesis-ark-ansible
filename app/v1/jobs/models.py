@@ -66,7 +66,7 @@ class Job:
         events_collection = mongo.db["events"]
         stats = events_collection.find_one(query)
         if stats is None:
-            raise StatsNotFoundException(f"stats not found for job {self.job_id}")
+            raise StatsNotFoundException("job stats not found", job_id=self.job_id)
         return stats
 
     def get_status(self) -> dict:
@@ -75,7 +75,7 @@ class Job:
         )
 
         if not os.path.exists(status_file_path):
-            raise StatusNotFoundException(f"status not found: job_id = '{self.job_id}'")
+            raise StatusNotFoundException("job status not found", job_id=self.job_id)
         status = None
         with open(status_file_path, "r") as f:
             status = f.read().rstrip()
