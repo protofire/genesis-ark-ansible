@@ -3,18 +3,30 @@
   ansible.builtin.debug:
     msg: "The following file will be downloaded: {{ validator_bin_repo_url }}/ipc-cli.linux-{{ validator__arch_map[ansible_architecture] }}"
 
-- name: Download binaries archive
+- name: Remove previous downloaded version
   tags: always
   become: true
-  ansible.builtin.get_url:
-    url: "{{ validator_bin_repo_url }}/ipc-cli.linux-{{ validator__arch_map[ansible_architecture] }}"
-    dest: "/tmp/ipc-cli.linux-{{ validator__arch_map[ansible_architecture] }}"
-    mode: "0755"
+  ansible.builtin.file:
+    path: "/tmp/ipc-cli.linux-{{ validator__arch_map[ansible_architecture] }}"
+    state: absent
+
+- name: Download repo archive
+  tags: always
+  become: true
+  ansible.builtin.shell: aria2c -x5 "{{ validator_bin_repo_url }}/ipc-cli.linux-{{ validator__arch_map[ansible_architecture] }}" -d /tmp
+  changed_when: true
+
+- name: Ensure destination directory exists
+  tags: always
+  become: true
+  ansible.builtin.file:
+    path: "{{ validator_ipc_repository_path }}"
+    state: directory
+    mode: "0774"
     owner: ubuntu
     group: ubuntu
-    force: true
 
-- name: Unarchive binaries
+- name: Unarchive repo
   tags: always
   ansible.builtin.unarchive:
     src: "/tmp/ipc-cli.linux-{{ validator__arch_map[ansible_architecture] }}"

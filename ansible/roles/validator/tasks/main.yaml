@@ -19,11 +19,6 @@
   tags:
     - validator:prune
 
-- name: Ensure repositories are up-to-date
-  ansible.builtin.include_tasks: update_repos.yaml
-  tags:
-    - validator:prepare
-
 - name: Ensure fendermint image is present
   ansible.builtin.include_tasks: pull_images.yaml
   tags:

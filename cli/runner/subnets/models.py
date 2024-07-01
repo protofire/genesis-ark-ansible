@@ -9,9 +9,9 @@ from runner.playbooks.models import PlaybooksClient
 from runner.subnets.exceptions import (
     BootstrapsNotFound,
     InstanceConnectionConfigNotFoundException,
-    WalletNotFoundException,
     SubnetCreationEventNotFoundException,
     SubnetIdNotFoundException,
+    WalletNotFoundException,
     BootstrapNodeStartEventNotFoundException,
     CometBftNodeIdNotFoundException,
     IpldResolverMultiaddressNotFoundException,
@@ -102,12 +102,71 @@ class AnsibleOperator:
             },
         )
 
+        if len(events_res) != 1:
+            raise BootstrapNodeStartEventNotFoundException(
+                "bootstrap start event not found", job_id=job_id
+            )
+
         bootstrap_started_event = events_res[0]
         stdout = bootstrap_started_event["event_data"]["res"]["msg"]["stdout"]
 
         pattern = r"CometBFT node ID:\s+([a-z0-9]+)"
         found = re.findall(pattern=pattern, string=stdout)
+        if len(found) == 0:
+            raise CometBftNodeIdNotFoundException(
+                "cometbft node id not found in event stdout",
+                job_id=job_id,
+                event_uuid=bootstrap_started_event["uuid"],
+            )
+
         return found[0]
+
+    def set_validator_bootstraps(
+        self, cometbft_node_id: str, ip_address: str, port: int = 26656
+    ) -> None:
+        validator_bootstraps = f"{cometbft_node_id}@{ip_address}:{port}"
+        self.inventories_client.set_group_vars(
+            project_id=self.project_id,
+            group_name=self.NON_BOOTSTRAPS_GROUP_NAME,
+            group_vars={"validator_bootstraps": validator_bootstraps},
+        )
+
+    def get_ipld_resolver_multiaddress(self, job_id: str) -> str:
+        events_res = self.jobs_client.list_events(
+            job_id=job_id,
+            events_filter={
+                "event": "runner_on_ok",
+                "task": "Print run bootstrap command output",
+            },
+        )
+
+        if len(events_res) != 1:
+            raise BootstrapNodeStartEventNotFoundException(
+                "bootstrap start event not found", job_id=job_id
+            )
+
+        bootstrap_started_event = events_res[0]
+        stdout = bootstrap_started_event["event_data"]["res"]["msg"]["stdout"]
+        pattern = r"IPLD Resolver Multiaddress:\s+([A-z0-9\/\.]+)"
+        found = re.findall(pattern=pattern, string=stdout)
+        if len(found) == 0:
+            raise IpldResolverMultiaddressNotFoundException(
+                "ipld resolver multiaddr not found in event stdout",
+                job_id=job_id,
+                event_uuid=bootstrap_started_event["uuid"],
+            )
+
+        return found[0]
+
+    def set_validator_resolver_bootstraps(
+        self, multiaddr: str, ip_address: str
+    ) -> None:
+        validator_resolver_bootstraps = multiaddr.replace("0.0.0.0", ip_address)
+        self.inventories_client.set_group_vars(
+            project_id=self.project_id,
+            group_name=self.NON_BOOTSTRAPS_GROUP_NAME,
+            group_vars={"validator_resolver_bootstraps": validator_resolver_bootstraps},
+        )
 
     def get_subnet_id(self, job_id: str) -> str:
         event_type = "runner_on_ok"
@@ -123,7 +182,7 @@ class AnsibleOperator:
 
         if len(events) != 1:
             raise SubnetCreationEventNotFoundException(
-                f"subnet creation event not found: runner_ident = '{job_id}', event_type = '{event_type}', task_name = '{task_name}'"
+                "subnet creation event not found", job_id=job_id
             )
 
         event = events[0]
@@ -135,7 +194,9 @@ class AnsibleOperator:
 
         if len(found) == 0:
             raise SubnetIdNotFoundException(
-                f"subnet id not found in event stdout: event_uuid = '{event['uuid']}'"
+                "subnet id not found in event stdout",
+                job_id=job_id,
+                event_uuid=event["uuid"],
             )
 
         full_subnet_id = found[0]
@@ -163,6 +224,14 @@ class AnsibleOperator:
         res = self.playbooks_client.start_validator(
             project_id=self.project_id,
             extra_vars={"var_host": self.NON_BOOTSTRAPS_GROUP_NAME},
+        )
+
+        return res["job_id"]
+
+    def start_relayer(self) -> str:
+        res = self.playbooks_client.start_relayer(
+            project_id=self.project_id,
+            extra_vars={"var_host": self.BOOTSTRAPS_GROUP_NAME},
         )
 
         return res["job_id"]
@@ -204,6 +273,13 @@ class AnsibleOperator:
         )
 
         return res["job_id"]
+
+    def get_bootstrap_ip_address(self) -> str:
+        connection_config = self.get_instance_connection_config(
+            node_id=self.bootstraps[0]["id"]
+        )
+
+        return connection_config["ipAddress"]
 
     def compute_host_vars(self, node_config: dict) -> dict:
         instance_connection_config = self.get_instance_connection_config(

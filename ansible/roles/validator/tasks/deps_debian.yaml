@@ -15,3 +15,35 @@
   tags: always
   ansible.builtin.shell: /home/ubuntu/.cargo/bin/cargo install --force cargo-make
   changed_when: true
+
+- name: Install foundryup
+  tags: always
+  ansible.builtin.shell: curl -L https://foundry.paradigm.xyz | bash
+  changed_when: true
+
+- name: Run foundryup
+  tags: always
+  ansible.builtin.shell: /home/ubuntu/.foundry/bin/foundryup
+  changed_when: true
+
+- name: Install nodejs gpg key
+  tags: always
+  become: true
+  ansible.builtin.apt_key:
+    url: "https://deb.nodesource.com/gpgkey/nodesource.gpg.key"
+    state: present
+
+- name: Install nodejs repository
+  tags: always
+  become: true
+  ansible.builtin.apt_repository:
+    repo: "deb https://deb.nodesource.com/node_{{ validator_nodejs_version }}.x {{ ansible_distribution_release }} main"
+    state: present
+    update_cache: true
+
+- name: Install nodejs
+  tags: always
+  become: true
+  ansible.builtin.apt:
+    name: nodejs
+    state: present

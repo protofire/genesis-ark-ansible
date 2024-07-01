@@ -1,5 +1,4 @@
 import requests
-from runner.logging import logger
 from runner.client import Client
 import time
 from runner.jobs.exceptions import (
@@ -51,12 +50,12 @@ class JobsClient(Client):
                 res = self.get_status(job_id=job_id)
                 status = res["status"]
                 if status == "failed":
-                    raise JobFailedException(f"job failed: job_id = {job_id}")
+                    raise JobFailedException("job failed", job_id=job_id)
                 return status
             except StatusNotFoundException:
                 time.sleep(wait_seconds)
                 current_attempt += 1
                 continue
         raise TimeoutWaitingForCompletionException(
-            f"max tries reached while waiting for completion of job '{job_id}'"
+            "max tries reached while waiting for job completion", job_id=job_id
         )
