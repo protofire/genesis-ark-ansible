@@ -16,7 +16,14 @@ def subnets():
     name="create",
     help="Pull requests from queue and deploy subnets accordingly.",
 )
-def create_subnet():
+@click.option(
+    "--skip-prepare",
+    is_flag=True,
+    default=False,
+    show_default=True,
+    help="Skip dependencies installation",
+)
+def create_subnet(skip_prepare: bool):
     subnet_config = pull_request()
     conn_config = pull_inventory()
 
@@ -24,8 +31,9 @@ def create_subnet():
 
     operator.create_inventory()
 
-    prepare_job_id = operator.prepare()
-    operator.jobs_client.await_completion(job_id=prepare_job_id, wait_seconds=30)
+    if not skip_prepare:
+        prepare_job_id = operator.prepare()
+        operator.jobs_client.await_completion(job_id=prepare_job_id, wait_seconds=30)
 
     create_subnet_job_id = operator.create_subnet()
     operator.jobs_client.await_completion(job_id=create_subnet_job_id, wait_seconds=5)
@@ -53,11 +61,10 @@ def create_subnet():
     )
     bootstrap_ip_address = operator.get_bootstrap_ip_address()
 
-    operator.set_validator_bootstraps(
-        cometbft_node_id=cometbft_node_id, ip_address=bootstrap_ip_address
-    )
-    operator.set_validator_resolver_bootstraps(
-        multiaddr=ipld_resolver_multiaddress, ip_address=bootstrap_ip_address
+    operator.set_bootstraps(
+        cometbft_node_id=cometbft_node_id,
+        ip_address=bootstrap_ip_address,
+        multiaddr=ipld_resolver_multiaddress,
     )
 
     start_validators_job_id = operator.start_validators()
@@ -84,4 +91,9 @@ def test():
     help="Pull requests from queue and delete subnets accordingly.",
 )
 def delete_subnet():
-    print("Delete subnet!")
+    subnet_config = pull_request()
+    conn_config = pull_inventory()
+
+    operator = AnsibleOperator(subnet_config=subnet_config, conn_config=conn_config)
+    prune_job_id = operator.prune()
+    operator.jobs_client.await_completion(job_id=prune_job_id, wait_seconds=5)

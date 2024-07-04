@@ -65,6 +65,14 @@ class PlaybooksClient(Client):
             tags=["validator:join_subnet"],
         )
 
+    def prune(self, project_id: str, extra_vars: dict = {}) -> dict:
+        return self.run_playbook(
+            playbook_name=self.VALIDATOR_PLAYBOOK_NAME,
+            project_id=project_id,
+            extra_vars=extra_vars,
+            tags=["validator:prune"],
+        )
+
     def start_bootstrap(self, project_id: str, extra_vars: dict = {}) -> dict:
         return self.run_playbook(
             playbook_name=self.VALIDATOR_PLAYBOOK_NAME,

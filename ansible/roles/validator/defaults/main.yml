@@ -71,13 +71,13 @@ validator_subnet_id: "t410fug7q7fgzeehfgr6qlubzs45z2sjzcbw3nbhpiyi"
 # @var validator_cmt_p2p_host_port:description: >
 # `validator_cmt_p2p_host_port` is a Comet BFT P2P port.
 # @end
-validator_cmt_p2p_host_port: "3305"
+validator_cmt_p2p_host_port: "26656"
 
 # @var validator_cmt_rpc_host_port:type: integer
 # @var validator_cmt_rpc_host_port:description: >
 # `validator_cmt_rpc_host_port` is a Comet BFT RPC port.
 # @end
-validator_cmt_rpc_host_port: "3306"
+validator_cmt_rpc_host_port: "26657"
 
 # @var validator_ethapi_host_port:type: integer
 # @var validator_ethapi_host_port:description: >

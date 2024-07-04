@@ -121,14 +121,18 @@ class AnsibleOperator:
 
         return found[0]
 
-    def set_validator_bootstraps(
-        self, cometbft_node_id: str, ip_address: str, port: int = 26656
+    def set_bootstraps(
+        self, cometbft_node_id: str, ip_address: str, multiaddr: str, port: int = 26656
     ) -> None:
         validator_bootstraps = f"{cometbft_node_id}@{ip_address}:{port}"
+        validator_resolver_bootstraps = multiaddr.replace("0.0.0.0", ip_address)
         self.inventories_client.set_group_vars(
             project_id=self.project_id,
             group_name=self.NON_BOOTSTRAPS_GROUP_NAME,
-            group_vars={"validator_bootstraps": validator_bootstraps},
+            group_vars={
+                "validator_bootstraps": validator_bootstraps,
+                "validator_resolver_bootstraps": validator_resolver_bootstraps,
+            },
         )
 
     def get_ipld_resolver_multiaddress(self, job_id: str) -> str:
@@ -157,16 +161,6 @@ class AnsibleOperator:
             )
 
         return found[0]
-
-    def set_validator_resolver_bootstraps(
-        self, multiaddr: str, ip_address: str
-    ) -> None:
-        validator_resolver_bootstraps = multiaddr.replace("0.0.0.0", ip_address)
-        self.inventories_client.set_group_vars(
-            project_id=self.project_id,
-            group_name=self.NON_BOOTSTRAPS_GROUP_NAME,
-            group_vars={"validator_resolver_bootstraps": validator_resolver_bootstraps},
-        )
 
     def get_subnet_id(self, job_id: str) -> str:
         event_type = "runner_on_ok"
@@ -274,6 +268,14 @@ class AnsibleOperator:
 
         return res["job_id"]
 
+    def prune(self) -> str:
+        res = self.playbooks_client.prune(
+            project_id=self.project_id,
+            extra_vars={"var_host": self.VALIDATORS_GROUP_NAME},
+        )
+
+        return res["job_id"]
+
     def get_bootstrap_ip_address(self) -> str:
         connection_config = self.get_instance_connection_config(
             node_id=self.bootstraps[0]["id"]
@@ -294,7 +296,7 @@ class AnsibleOperator:
             "validator_parent_registry": "0xc938B2B862d4Ef9896E641b3f1269DabFB2D2103",
             "validator_parent_gateway": "0x6d25fbFac9e6215E03C687E54F7c74f489949EaF",
             "validator_min_validator_stake": self.subnet_config["minStake"],
-            "validator_min_validators": 1,
+            "validator_min_validators": 4,
             "validator_bottom_check_period": self.subnet_config["bottomUp"],
             "validator_permission_mode": "collateral",
             "validator_supply_source_kind": "native",
@@ -303,6 +305,7 @@ class AnsibleOperator:
             ),
             "validator_secrets": self.secrets,
             "ansible_sudo_pass": "12345",  # TODO: replace with the sudo password of the host somehow
+            "ansible_ssh_private_key_file": "~/.ssh/filecoin_dev",
         }
 
     def get_bootstrap_validators_node_configs(self) -> list[dict]:
