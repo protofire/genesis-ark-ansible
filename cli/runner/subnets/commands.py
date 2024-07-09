@@ -86,6 +86,51 @@ def test():
     operator = AnsibleOperator(subnet_config=subnet_config, conn_config=conn_config)
 
 
+@subnets.command(name="install-blockscout")
+def install_blockscout():
+    subnet_config = pull_request()
+    conn_config = pull_inventory()
+
+    operator = AnsibleOperator(subnet_config=subnet_config, conn_config=conn_config)
+
+    operator.create_inventory()
+
+    install_blockscout_job_id = operator.install_blockscout()
+    operator.jobs_client.await_completion(
+        job_id=install_blockscout_job_id, wait_seconds=5
+    )
+
+
+@subnets.command(name="reset-blockscout")
+def reset_blockscout():
+    subnet_config = pull_request()
+    conn_config = pull_inventory()
+
+    operator = AnsibleOperator(subnet_config=subnet_config, conn_config=conn_config)
+
+    operator.create_inventory()
+
+    reset_blockscout_job_id = operator.reset_blockscout()
+    operator.jobs_client.await_completion(
+        job_id=reset_blockscout_job_id, wait_seconds=5
+    )
+
+
+@subnets.command(name="update-blockscout")
+def update_blockscout():
+    subnet_config = pull_request()
+    conn_config = pull_inventory()
+
+    operator = AnsibleOperator(subnet_config=subnet_config, conn_config=conn_config)
+
+    operator.create_inventory()
+
+    update_blockscout_job_id = operator.update_blockscout()
+    operator.jobs_client.await_completion(
+        job_id=update_blockscout_job_id, wait_seconds=5
+    )
+
+
 @subnets.command(
     name="delete",
     help="Pull requests from queue and delete subnets accordingly.",

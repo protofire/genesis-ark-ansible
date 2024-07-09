@@ -1,0 +1,75 @@
+- name: Install pip3
+  become: true
+  tags:
+    - blockscout:install
+  ansible.builtin.apt:
+    name:
+      - python3-pip
+    state: present
+    update_cache: true
+
+- name: Install docker python package
+  tags:
+    - blockscout:install
+  ansible.builtin.pip:
+    name:
+      - docker
+      - docker-compose
+
+- name: Ensure blockscout services are stopped and removed
+  tags:
+    - blockscout:update
+    - blockscout:reset
+  community.docker.docker_compose_v2:
+    project_src: "{{ blockscout_repo_dest }}/docker-compose"
+    state: absent
+
+- name: Ensure blockscout data is absent
+  become: true
+  tags:
+    - blockscout:reset
+  ansible.builtin.file:
+    path: "{{ blockscout_repo_dest }}/docker-compose/services/{{ item }}"
+    state: absent
+  loop:
+    - blockscout-db-data
+    - redis-data
+    - stats-db-data
+
+- name: Ensure blockscout repo is up-to-date
+  tags:
+    - blockscout:install
+    - blockscout:update
+    - blockscout:reset
+  ansible.builtin.git:
+    repo: "{{ blockscout_repo_url }}"
+    dest: "{{ blockscout_repo_dest }}"
+    version: "{{ blockscout_repo_version }}"
+    force: true
+    update: true
+
+- name: Ensure blockscout configs are up-to-date
+  tags:
+    - blockscout:install
+    - blockscout:update
+    - blockscout:reset
+  ansible.builtin.template:
+    src: config.env.j2
+    dest: "{{ blockscout_repo_dest }}/docker-compose/envs/{{ item }}"
+    mode: "0664"
+    owner: ubuntu
+    group: ubuntu
+  loop:
+    - common-blockscout.env
+    - common-frontend.env
+    - common-smart-contract-verifier.env
+    - common-stats.env
+    - common-visualizer.env
+
+- name: Ensure blockscout services are created and started
+  tags:
+    - blockscout:install
+    - blockscout:update
+    - blockscout:reset
+  community.docker.docker_compose_v2:
+    project_src: "{{ blockscout_repo_dest }}/docker-compose"

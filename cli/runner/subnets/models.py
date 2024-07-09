@@ -230,6 +230,52 @@ class AnsibleOperator:
 
         return res["job_id"]
 
+    def get_base_domain_name(self) -> str:
+        return f"subnet-{self.project_id}.ark.protofire.io"
+
+    # TODO: add docker pip dependency to the playbook
+    def install_blockscout(self) -> str:
+        base_domain_name = self.get_base_domain_name()
+        res = self.playbooks_client.install_blockscout(
+            project_id=self.project_id,
+            extra_vars={
+                "var_host": self.CONTOL_GROUP_NAME,
+                "blockscout_host": f"explorer.{base_domain_name}",
+                "blockscout_jsonrpc_host": f"rpc.{base_domain_name}",
+                "blockscout_network_name": f"Subnet {self.project_id}",
+            },
+        )
+
+        return res["job_id"]
+
+    def update_blockscout(self) -> str:
+        base_domain_name = self.get_base_domain_name()
+        res = self.playbooks_client.update_blockscout(
+            project_id=self.project_id,
+            extra_vars={
+                "var_host": self.CONTOL_GROUP_NAME,
+                "blockscout_host": f"explorer.{base_domain_name}",
+                "blockscout_jsonrpc_host": f"rpc.{base_domain_name}",
+                "blockscout_network_name": f"Subnet {self.project_id}",
+            },
+        )
+
+        return res["job_id"]
+
+    def reset_blockscout(self) -> str:
+        base_domain_name = self.get_base_domain_name()
+        res = self.playbooks_client.reset_blockscout(
+            project_id=self.project_id,
+            extra_vars={
+                "var_host": self.CONTOL_GROUP_NAME,
+                "blockscout_host": f"explorer.{base_domain_name}",
+                "blockscout_jsonrpc_host": f"rpc.{base_domain_name}",
+                "blockscout_network_name": f"Subnet {self.project_id}",
+            },
+        )
+
+        return res["job_id"]
+
     def get_instance_connection_config(self, node_id: int) -> dict:
         for instance_connection_config in self.conn_config["instanceconnections"]:
             if instance_connection_config["nodeId"] == node_id:

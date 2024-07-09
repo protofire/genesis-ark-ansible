@@ -18,6 +18,7 @@ def exception_raiser(error: dict) -> None:
 class PlaybooksClient(Client):
     LOGGER_NAME = "playbooks"
     VALIDATOR_PLAYBOOK_NAME = "validator.yaml"
+    BLOCKSCOUT_PLAYBOOK_NAME = "blockscout.yaml"
 
     @safe(exception_raiser=exception_raiser, default_exception=PlaybooksClientException)
     def run_playbook(
@@ -47,6 +48,30 @@ class PlaybooksClient(Client):
             project_id=project_id,
             extra_vars=extra_vars,
             tags=["validator:prepare"],
+        )
+
+    def install_blockscout(self, project_id, extra_vars: dict = {}) -> dict:
+        return self.run_playbook(
+            playbook_name=self.BLOCKSCOUT_PLAYBOOK_NAME,
+            project_id=project_id,
+            extra_vars=extra_vars,
+            tags=["blockscout:install"],
+        )
+
+    def update_blockscout(self, project_id, extra_vars: dict = {}) -> dict:
+        return self.run_playbook(
+            playbook_name=self.BLOCKSCOUT_PLAYBOOK_NAME,
+            project_id=project_id,
+            extra_vars=extra_vars,
+            tags=["blockscout:update"],
+        )
+
+    def reset_blockscout(self, project_id, extra_vars: dict = {}) -> dict:
+        return self.run_playbook(
+            playbook_name=self.BLOCKSCOUT_PLAYBOOK_NAME,
+            project_id=project_id,
+            extra_vars=extra_vars,
+            tags=["blockscout:reset"],
         )
 
     def create_subnet(self, project_id: str, extra_vars: dict = {}) -> dict:

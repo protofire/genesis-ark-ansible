@@ -76,7 +76,7 @@ def pull_inventory():
         "instanceconnections": [
             {
                 "nodeId": 1,
-                "ipAddress": "54.250.191.142",
+                "ipAddress": "13.230.155.237",
             },
             {
                 "nodeId": 2,
