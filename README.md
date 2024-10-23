@@ -48,8 +48,7 @@ docker-compose up mongo -d
 2. **Start the API**: Start the Flask API:
 
 ```bash
-cd app
-flask --app run --debug
+flask --app app run --debug
 ```
 
 3. **Install the Runner CLI**: Install the Runner CLI using pip:
