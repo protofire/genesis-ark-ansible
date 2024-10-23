@@ -54,6 +54,7 @@ flask --app app run --debug
 3. **Install the Runner CLI**: Install the Runner CLI using pip:
 
 ```bash
+cd cli
 pip install --editable .
 ```
 
