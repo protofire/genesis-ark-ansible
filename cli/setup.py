@@ -6,9 +6,18 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
-        "Click",
+        "flask",
+        "ansible-runner",
         "jsonschema",
-        "loguru",
+        "toml",
+        "PyYAML",
+        "requests",
+        "pymongo[srv]",
+        "Flask-PyMongo",
+        "click",
+        "eth-keys",
+        "web3",
+        "loguru"
     ],
     entry_points="""
         [console_scripts]

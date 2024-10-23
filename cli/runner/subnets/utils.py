@@ -76,19 +76,19 @@ def pull_inventory():
         "instanceconnections": [
             {
                 "nodeId": 1,
-                "ipAddress": "13.230.155.237",
+                "ipAddress": "34.229.207.137",
             },
             {
                 "nodeId": 2,
-                "ipAddress": "43.206.151.61",
+                "ipAddress": "3.85.49.28",
             },
             {
                 "nodeId": 3,
-                "ipAddress": "54.250.184.99",
+                "ipAddress": "52.91.108.188",
             },
             {
                 "nodeId": 4,
-                "ipAddress": "43.207.181.6",
+                "ipAddress": "54.210.152.30",
             },
         ],
     }

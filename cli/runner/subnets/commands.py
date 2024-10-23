@@ -34,6 +34,9 @@ def create_subnet(skip_prepare: bool):
     if not skip_prepare:
         prepare_job_id = operator.prepare()
         operator.jobs_client.await_completion(job_id=prepare_job_id, wait_seconds=30)
+    
+    copy_config_job_id = operator.copy_config()
+    operator.jobs_client.await_completion(job_id=copy_config_job_id, wait_seconds=5)
 
     create_subnet_job_id = operator.create_subnet()
     operator.jobs_client.await_completion(job_id=create_subnet_job_id, wait_seconds=5)

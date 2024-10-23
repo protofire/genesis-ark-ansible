@@ -72,6 +72,12 @@
       - docker
     append: true
 
+- name: Uninstall rust
+  tags: always
+  ansible.builtin.shell: /home/ubuntu/.cargo/bin/rustup self uninstall -y
+  changed_when: true
+  failed_when: false
+
 - name: Install rust
   tags: always
   ansible.builtin.shell: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y

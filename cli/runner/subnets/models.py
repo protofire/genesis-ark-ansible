@@ -339,8 +339,8 @@ class AnsibleOperator:
             "validator_name": validator_name,
             "validator_private_key_path": f"/home/ubuntu/.ipc/{validator_name}.sk",
             "validator_parent_subnet_id": "r314159",
-            "validator_parent_registry": "0xc938B2B862d4Ef9896E641b3f1269DabFB2D2103",
-            "validator_parent_gateway": "0x6d25fbFac9e6215E03C687E54F7c74f489949EaF",
+            "validator_parent_registry": "0xC1E8E7EE4EFe6b35A5Ff1f20792C9eD99415DFCe",
+            "validator_parent_gateway": "0x528fd57079fC36028dA844440D508e56aD447c5B",
             "validator_min_validator_stake": self.subnet_config["minStake"],
             "validator_min_validators": 4,
             "validator_bottom_check_period": self.subnet_config["bottomUp"],
@@ -351,7 +351,7 @@ class AnsibleOperator:
             ),
             "validator_secrets": self.secrets,
             "ansible_sudo_pass": "12345",  # TODO: replace with the sudo password of the host somehow
-            "ansible_ssh_private_key_file": "~/.ssh/filecoin_dev",
+            "ansible_ssh_private_key_file": "~/.ssh/id_rsa",
         }
 
     def get_bootstrap_validators_node_configs(self) -> list[dict]:
