@@ -16,6 +16,7 @@ This microservice is designed to create an IPC subnet based on user-provided par
 	* [Runner CLI](#RunnerCLI)
 		* [User Parameters](#UserParameters)
 		* [Infrastructure Config](#InfrastructureConfig)
+		* [Hardcoded Values](#HardcodedValues)
 * [Requirements](#Requirements)
 * [Contributing](#Contributing)
 
@@ -188,6 +189,26 @@ This microservice is still a work in progress! To get started, you can manually 
 | --- | --- |
 | nodeId | Unique node identifier |
 | ipAddress | IP address associated with the node |
+
+#### <a name='HardcodedValues'></a>Hardcoded Values
+
+This microservice is work in progress, so there's a bit of hardcoded values. Most of them are used while populating inventory. You can find them in the [cli/runner/subnets/models.py](cli/runner/subnets/models.py) file:
+
+**Configuratuin Values**:
+
+- `validator_parent_subnet_id`: r314159
+- `validator_parent_registry`: 0xC1E8E7EE4EFe6b35A5Ff1f20792C9eD99415DFCe
+- `validator_parent_gateway`: 0x528fd57079fC36028dA844440D508e56aD447c5B
+- `validator_min_validators`: 4
+- `validator_permission_mode`: collateral
+- `validator_supply_source_kind`: native
+
+***ATTENTION!***: You have to replace `validator_parent_registry` and `validator_parent_gateway` here and not in the [validator role configuration](#validator-role) in order for your values to be reflected in the inventory.
+
+**Security Values**:
+
+- `ansible_sudo_pass`: 12345
+- `ansible_ssh_private_key_file`: ~/.ssh/id_rsa
 
 ## <a name='Requirements'></a>Requirements
 The following dependencies are required to run this microservice:
