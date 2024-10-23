@@ -1,0 +1,6 @@
+- name: Configure validator
+  hosts: "{{ var_host | default('dev') }}"
+  remote_user: ubuntu
+
+  roles:
+    - role: blockscout

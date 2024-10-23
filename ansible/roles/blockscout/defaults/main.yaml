@@ -1,0 +1,41 @@
+# @var blockscout_repo_url:type: string
+# @var blockscout_repo_url:description: >
+# `blockscout_repo_url` is the url of
+# blockscout Git repository.
+# @end
+blockscout_repo_url: https://github.com/blockscout/blockscout.git
+
+# @var blockscout_repo_version:type: string
+# @var blockscout_repo_version:description: >
+# `blockscout_repo_version` is the commit/branch/tag
+# of the blockscout repo to clone.
+# @end
+blockscout_repo_version: master
+
+# @var blockscout_repo_dest:type: string
+# @var blockscout_repo_dest:description: >
+# `blockscout_repo_dest` is the path
+# in the local filesystem where blockscout
+# repo will be cloned to.
+# @end
+blockscout_repo_dest: /home/ubuntu/blockscout
+
+# @var blockscout_host:type: string
+# @var blockscout_host:description: >
+# `blockscout_host` is equivalent of BLOCKSCOUT_HOST env var.
+# @end
+blockscout_host: explorer.mycelium.calibration.node.glif.io
+
+# @var blockscout_jsonrpc_host:type: string
+# @var blockscout_jsonrpc_host:description: >
+# `blockscout_jsonrpc_host` is the domain name or ip address
+# of the json rpc endpoint.
+# @end
+blockscout_jsonrpc_host: api.mycelium.calibration.node.glif.io
+
+# @var blockscout_network_name:type: string
+# @var blockscout_network_name:description: >
+# `blockscout_network_name` is the name of the network
+# blockscout is pointed to.
+# @end
+blockscout_network_name: Mycelium Calibration

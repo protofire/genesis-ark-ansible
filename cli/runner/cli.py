@@ -7,6 +7,7 @@ from runner.jobs.exceptions import (
     StatsNotFoundException,
     StatusNotFoundException,
     TimeoutWaitingForCompletionException,
+    JobFailedException,
 )
 from runner.keys.commands import keys
 from runner.logging import logger
@@ -32,5 +33,6 @@ def safe_entrypoint():
         StatusNotFoundException,
         JobsClientException,
         TimeoutWaitingForCompletionException,
+        JobFailedException,
     ) as e:
-        logger.error(e)
+        logger.critical(e.args[0], **e.extra)

@@ -13,11 +13,12 @@
   ansible.builtin.include_tasks: remove_containers.yaml
   tags:
     - validator:prune
+    - validator:update
 
 - name: Ensure relevant images are absent
   ansible.builtin.include_tasks: remove_images.yaml
   tags:
-    - validator:prune
+    - validator:update
 
 - name: Ensure fendermint image is present
   ansible.builtin.include_tasks: pull_images.yaml
@@ -29,6 +30,7 @@
   tags:
     - validator:prepare
     - validator:pull_bin
+    - validator:update
 
 - name: Ensure default config is present
   ansible.builtin.include_tasks: copy_default_config.yaml

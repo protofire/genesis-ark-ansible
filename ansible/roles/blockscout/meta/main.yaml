@@ -1,0 +1,21 @@
+# @meta description: >
+# Ansible role to manage blockscout.
+# @end
+galaxy_info:
+  author: Ales Dumikau
+  description: Ansible role to manage blockscout
+  company: Protofire
+
+  namespace: mycelium
+
+  # @meta license
+  license: "MIT"
+
+  min_ansible_version: "2.1"
+
+  platforms:
+    - name: Ubuntu
+
+  galaxy_tags: []
+
+dependencies: []

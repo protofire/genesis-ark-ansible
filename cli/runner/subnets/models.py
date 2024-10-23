@@ -121,14 +121,18 @@ class AnsibleOperator:
 
         return found[0]
 
-    def set_validator_bootstraps(
-        self, cometbft_node_id: str, ip_address: str, port: int = 26656
+    def set_bootstraps(
+        self, cometbft_node_id: str, ip_address: str, multiaddr: str, port: int = 26656
     ) -> None:
         validator_bootstraps = f"{cometbft_node_id}@{ip_address}:{port}"
+        validator_resolver_bootstraps = multiaddr.replace("0.0.0.0", ip_address)
         self.inventories_client.set_group_vars(
             project_id=self.project_id,
             group_name=self.NON_BOOTSTRAPS_GROUP_NAME,
-            group_vars={"validator_bootstraps": validator_bootstraps},
+            group_vars={
+                "validator_bootstraps": validator_bootstraps,
+                "validator_resolver_bootstraps": validator_resolver_bootstraps,
+            },
         )
 
     def get_ipld_resolver_multiaddress(self, job_id: str) -> str:
@@ -157,16 +161,6 @@ class AnsibleOperator:
             )
 
         return found[0]
-
-    def set_validator_resolver_bootstraps(
-        self, multiaddr: str, ip_address: str
-    ) -> None:
-        validator_resolver_bootstraps = multiaddr.replace("0.0.0.0", ip_address)
-        self.inventories_client.set_group_vars(
-            project_id=self.project_id,
-            group_name=self.NON_BOOTSTRAPS_GROUP_NAME,
-            group_vars={"validator_resolver_bootstraps": validator_resolver_bootstraps},
-        )
 
     def get_subnet_id(self, job_id: str) -> str:
         event_type = "runner_on_ok"
@@ -236,6 +230,52 @@ class AnsibleOperator:
 
         return res["job_id"]
 
+    def get_base_domain_name(self) -> str:
+        return f"subnet-{self.project_id}.ark.protofire.io"
+
+    # TODO: add docker pip dependency to the playbook
+    def install_blockscout(self) -> str:
+        base_domain_name = self.get_base_domain_name()
+        res = self.playbooks_client.install_blockscout(
+            project_id=self.project_id,
+            extra_vars={
+                "var_host": self.CONTOL_GROUP_NAME,
+                "blockscout_host": f"explorer.{base_domain_name}",
+                "blockscout_jsonrpc_host": f"rpc.{base_domain_name}",
+                "blockscout_network_name": f"Subnet {self.project_id}",
+            },
+        )
+
+        return res["job_id"]
+
+    def update_blockscout(self) -> str:
+        base_domain_name = self.get_base_domain_name()
+        res = self.playbooks_client.update_blockscout(
+            project_id=self.project_id,
+            extra_vars={
+                "var_host": self.CONTOL_GROUP_NAME,
+                "blockscout_host": f"explorer.{base_domain_name}",
+                "blockscout_jsonrpc_host": f"rpc.{base_domain_name}",
+                "blockscout_network_name": f"Subnet {self.project_id}",
+            },
+        )
+
+        return res["job_id"]
+
+    def reset_blockscout(self) -> str:
+        base_domain_name = self.get_base_domain_name()
+        res = self.playbooks_client.reset_blockscout(
+            project_id=self.project_id,
+            extra_vars={
+                "var_host": self.CONTOL_GROUP_NAME,
+                "blockscout_host": f"explorer.{base_domain_name}",
+                "blockscout_jsonrpc_host": f"rpc.{base_domain_name}",
+                "blockscout_network_name": f"Subnet {self.project_id}",
+            },
+        )
+
+        return res["job_id"]
+
     def get_instance_connection_config(self, node_id: int) -> dict:
         for instance_connection_config in self.conn_config["instanceconnections"]:
             if instance_connection_config["nodeId"] == node_id:
@@ -274,6 +314,14 @@ class AnsibleOperator:
 
         return res["job_id"]
 
+    def prune(self) -> str:
+        res = self.playbooks_client.prune(
+            project_id=self.project_id,
+            extra_vars={"var_host": self.VALIDATORS_GROUP_NAME},
+        )
+
+        return res["job_id"]
+
     def get_bootstrap_ip_address(self) -> str:
         connection_config = self.get_instance_connection_config(
             node_id=self.bootstraps[0]["id"]
@@ -291,10 +339,10 @@ class AnsibleOperator:
             "validator_name": validator_name,
             "validator_private_key_path": f"/home/ubuntu/.ipc/{validator_name}.sk",
             "validator_parent_subnet_id": "r314159",
-            "validator_parent_registry": "0xc938B2B862d4Ef9896E641b3f1269DabFB2D2103",
-            "validator_parent_gateway": "0x6d25fbFac9e6215E03C687E54F7c74f489949EaF",
+            "validator_parent_registry": "0xC1E8E7EE4EFe6b35A5Ff1f20792C9eD99415DFCe",
+            "validator_parent_gateway": "0x528fd57079fC36028dA844440D508e56aD447c5B",
             "validator_min_validator_stake": self.subnet_config["minStake"],
-            "validator_min_validators": 1,
+            "validator_min_validators": 4,
             "validator_bottom_check_period": self.subnet_config["bottomUp"],
             "validator_permission_mode": "collateral",
             "validator_supply_source_kind": "native",
@@ -303,6 +351,7 @@ class AnsibleOperator:
             ),
             "validator_secrets": self.secrets,
             "ansible_sudo_pass": "12345",  # TODO: replace with the sudo password of the host somehow
+            "ansible_ssh_private_key_file": "~/.ssh/id_rsa",
         }
 
     def get_bootstrap_validators_node_configs(self) -> list[dict]:

@@ -6,6 +6,78 @@
     state: present
     update_cache: true
 
+- name: Install docker prerequisites
+  become: true
+  tags: always
+  ansible.builtin.apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg
+      - lsb-release
+      - software-properties-common
+    state: present
+    update_cache: true
+
+- name: Import Docker GPG signing key
+  become: true
+  tags: always
+  ansible.builtin.apt_key:
+    url: "https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg"
+    state: present
+    keyring: /usr/share/keyrings/docker-archive-keyring.gpg
+
+- name: Add Docker repository
+  become: true
+  tags: always
+  ansible.builtin.apt_repository:
+    repo: >
+      deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg]
+      https://download.docker.com/linux/{{ ansible_distribution | lower  }}
+      {{ ansible_distribution_release }} stable
+    state: present
+    filename: docker
+    update_cache: true
+
+- name: Install Docker and its dependencies
+  become: true
+  tags: always
+  ansible.builtin.apt:
+    name: docker-ce
+    state: present
+    update_cache: true
+
+- name: Restart Docker
+  become: true
+  tags: always
+  ansible.builtin.service:
+    name: docker
+    state: restarted
+    enabled: true
+
+- name: Ensure group 'docker' exists
+  become: true
+  tags: always
+  ansible.builtin.group:
+    name: docker
+    state: present
+
+- name: Ensure current user is in group 'docker'
+  become: true
+  tags: always
+  ansible.builtin.user:
+    name: "{{ ansible_user_id }}"
+    groups:
+      - docker
+    append: true
+
+- name: Uninstall rust
+  tags: always
+  ansible.builtin.shell: /home/ubuntu/.cargo/bin/rustup self uninstall -y
+  changed_when: true
+  failed_when: false
+
 - name: Install rust
   tags: always
   ansible.builtin.shell: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y

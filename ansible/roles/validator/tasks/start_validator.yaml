@@ -28,7 +28,7 @@
       - -e
       - "PARENT_GATEWAY={{ validator_parent_gateway }}"
       - -e
-      - "CMT_EXTERNAL_ADDR={{ ansible_default_ipv4.address }}:{{ validator_cmt_p2p_host_port }}"
+      - "CMT_EXTERNAL_ADDR={{ ansible_host }}:{{ validator_cmt_p2p_host_port }}"
       - -e
       - FM_PULL_SKIP="1"
       - child-validator
